@@ -94,3 +94,28 @@ export interface UserProfile {
   points: number;
   savedVouchers: string[];
 }
+
+export type OrderStatus = 'pending' | 'confirmed' | 'packaging' | 'shipped' | 'delivered' | 'cancelled';
+
+export interface CustomerOrder {
+  id: string;
+  orderRef: string;
+  customerName: string;
+  customerPhone: string;
+  telegramHandle: string;
+  province: string;
+  address: string;
+  notes?: string;
+  paymentMethod: 'cod' | 'khqr' | 'wing';
+  items: CartItem[];
+  subtotalUsd: number;
+  discountUsd: number;
+  deliveryFeeUsd: number;
+  totalUsd: number;
+  totalKhr: number;
+  pointsEarned: number;
+  voucherCodeApplied?: string | null;
+  status: OrderStatus;
+  createdAt: string;
+}
+

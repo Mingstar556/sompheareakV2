@@ -23,6 +23,7 @@ export const CheckoutModal: React.FC = () => {
     currency,
     activeVoucher,
     addPoints,
+    saveOrder,
     t,
   } = useStore();
 
@@ -110,6 +111,29 @@ export const CheckoutModal: React.FC = () => {
     });
 
     addPoints(totalPoints);
+
+    // Save order so Admin Panel can view and fulfill it
+    saveOrder({
+      id: `ord-${Date.now()}`,
+      orderRef,
+      customerName: form.fullName,
+      customerPhone: form.phone,
+      telegramHandle: form.telegramHandle,
+      province: form.province,
+      address: form.address,
+      paymentMethod: form.paymentMethod,
+      items: [...cart],
+      subtotalUsd,
+      discountUsd,
+      deliveryFeeUsd,
+      totalUsd,
+      totalKhr: Math.round(totalUsd * 4100),
+      pointsEarned: totalPoints,
+      voucherCodeApplied: activeVoucher?.code || null,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
+
     setSubmittedOrder({
       orderRef,
       telegramUrl: shareUrl,
@@ -129,17 +153,17 @@ export const CheckoutModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-lg bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto"
+          className="relative w-full max-w-lg bg-white dark:bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 dark:text-white max-h-[92vh] overflow-y-auto"
         >
           {/* Close Button */}
           <button
             onClick={handleClose}
-            className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+            className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -147,20 +171,20 @@ export const CheckoutModal: React.FC = () => {
           {!submittedOrder ? (
             /* Checkout Form */
             <div>
-              <div className="flex items-center gap-2 mb-2 text-toy-pink font-extrabold text-xs uppercase tracking-wider">
+              <div className="flex items-center gap-2 mb-2 text-emerald-600 dark:text-toy-pink font-extrabold text-xs uppercase tracking-wider">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Fast & Secure Cambodia Checkout</span>
               </div>
-              <h2 className="text-2xl font-black font-fredoka text-white">{t("checkoutTitle")}</h2>
-              <p className="text-xs text-slate-400 mt-1 mb-6">
+              <h2 className="text-2xl font-black font-fredoka text-slate-900 dark:text-white">{t("checkoutTitle")}</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">
                 Verified Telegram order with Cash on Delivery or ABA KHQR Scan.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full Name */}
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-toy-cyan" />
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-cyan" />
                     <span>{t("fullName")} *</span>
                   </label>
                   <input
@@ -169,15 +193,15 @@ export const CheckoutModal: React.FC = () => {
                     value={form.fullName}
                     onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                     placeholder="e.g. Chan Dara / Sokha"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-toy-purple outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                   />
                 </div>
 
                 {/* Contact Phone & Telegram Handle */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-toy-green" />
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-green" />
                       <span>{t("phoneNumber")} *</span>
                     </label>
                     <input
@@ -186,12 +210,12 @@ export const CheckoutModal: React.FC = () => {
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="012 345 678"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-toy-purple outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                      <MessageCircle className="w-3.5 h-3.5 text-toy-cyan" />
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
+                      <MessageCircle className="w-3.5 h-3.5 text-teal-600 dark:text-toy-cyan" />
                       <span>{t("telegramHandle")}</span>
                     </label>
                     <input
@@ -199,21 +223,21 @@ export const CheckoutModal: React.FC = () => {
                       value={form.telegramHandle}
                       onChange={(e) => setForm({ ...form, telegramHandle: e.target.value })}
                       placeholder="@username"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-toy-purple outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Province / City */}
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-toy-pink" />
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-pink" />
                     <span>{t("province")}</span>
                   </label>
                   <select
                     value={form.province}
                     onChange={(e) => setForm({ ...form, province: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-toy-purple outline-none cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:border-emerald-500 outline-none cursor-pointer"
                   >
                     {cambodiaProvinces.map((prov) => (
                       <option key={prov} value={prov}>
@@ -225,7 +249,7 @@ export const CheckoutModal: React.FC = () => {
 
                 {/* Street Address */}
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     {t("streetAddress")} *
                   </label>
                   <textarea
@@ -234,13 +258,13 @@ export const CheckoutModal: React.FC = () => {
                     value={form.address}
                     onChange={(e) => setForm({ ...form, address: e.target.value })}
                     placeholder="House number, Street, Sangkat, Khan..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-toy-purple outline-none resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:border-emerald-500 outline-none resize-none"
                   />
                 </div>
 
                 {/* Payment Method */}
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-2">{t("paymentMethod")}</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">{t("paymentMethod")}</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -250,8 +274,8 @@ export const CheckoutModal: React.FC = () => {
                       }}
                       className={`p-3 rounded-2xl border text-left text-xs font-bold transition-all ${
                         form.paymentMethod === "cod"
-                          ? "bg-toy-yellow/20 border-toy-yellow text-white shadow-md"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-850"
+                          ? "bg-amber-100 dark:bg-toy-yellow/20 border-amber-500 dark:border-toy-yellow text-amber-900 dark:text-white shadow-md"
+                          : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-850"
                       }`}
                     >
                       {t("cod")}
@@ -264,8 +288,8 @@ export const CheckoutModal: React.FC = () => {
                       }}
                       className={`p-3 rounded-2xl border text-left text-xs font-bold transition-all ${
                         form.paymentMethod === "khqr"
-                          ? "bg-emerald-950/60 border-emerald-500 text-white shadow-toy-green-glow"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-850"
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-white shadow-toy-green-glow"
+                          : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-850"
                       }`}
                     >
                       {t("khqr")}
@@ -276,8 +300,8 @@ export const CheckoutModal: React.FC = () => {
                 {/* Submit Button */}
                 <div className="pt-4">
                   <div className="flex justify-between items-center mb-3 text-sm">
-                    <span className="font-bold text-slate-300">{t("total")}:</span>
-                    <span className="text-2xl font-black text-toy-yellow font-fredoka">
+                    <span className="font-bold text-slate-600 dark:text-slate-300">{t("total")}:</span>
+                    <span className="text-2xl font-black text-amber-600 dark:text-toy-yellow font-fredoka">
                       {formatPrice(totalUsd, currency)}
                     </span>
                   </div>
@@ -295,30 +319,30 @@ export const CheckoutModal: React.FC = () => {
           ) : (
             /* Order Submitted Success State */
             <div className="text-center py-4">
-              <div className="w-16 h-16 rounded-3xl bg-toy-green/20 text-toy-green flex items-center justify-center mx-auto mb-4 border border-toy-green/40 shadow-toy-glow">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-toy-green/20 text-emerald-600 dark:text-toy-green flex items-center justify-center mx-auto mb-4 border border-emerald-300 dark:border-toy-green/40 shadow-toy-glow">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
-              <span className="text-xs font-bold text-toy-yellow uppercase tracking-widest">
+              <span className="text-xs font-bold text-amber-600 dark:text-toy-yellow uppercase tracking-widest">
                 Order Ref: {submittedOrder.orderRef}
               </span>
-              <h3 className="text-2xl font-black font-fredoka text-white mt-1">
+              <h3 className="text-2xl font-black font-fredoka text-slate-900 dark:text-white mt-1">
                 {t("orderSuccessTitle")}
               </h3>
-              <p className="text-xs text-slate-300 mt-2 max-w-sm mx-auto leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 max-w-sm mx-auto leading-relaxed">
                 {t("orderSuccessNotice")}
               </p>
 
-              <div className="my-5 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs space-y-1.5">
-                <div className="flex justify-between text-slate-400">
+              <div className="my-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-1.5">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>Total Amount:</span>
-                  <span className="font-bold text-toy-yellow">
+                  <span className="font-bold text-amber-600 dark:text-toy-yellow">
                     {formatPrice(submittedOrder.totalUsd, currency)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>VIP Points Earned:</span>
-                  <span className="font-bold text-toy-green">+{submittedOrder.points} pt</span>
+                  <span className="font-bold text-emerald-600 dark:text-toy-green">+{submittedOrder.points} pt</span>
                 </div>
               </div>
 
@@ -336,7 +360,7 @@ export const CheckoutModal: React.FC = () => {
 
               <button
                 onClick={handleClose}
-                className="mt-3 text-xs text-slate-400 hover:text-white font-bold"
+                className="mt-3 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
               >
                 Close & Return to Toys
               </button>

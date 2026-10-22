@@ -10,13 +10,13 @@ import { Search, ArrowUpDown, Sparkles, X } from "lucide-react";
 import { sounds } from "@/utils/audio";
 
 export const ProductGrid: React.FC = () => {
-  const { selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, sortBy, setSortBy, language, t } =
+  const { products, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, sortBy, setSortBy, language, t } =
     useStore();
 
   const currentCategoryObj = CATEGORIES.find((c) => c.id === selectedCategory) || CATEGORIES[0];
 
   const filteredAndSortedProducts = useMemo(() => {
-    let list = PRODUCTS.filter((p) => {
+    let list = products.filter((p) => {
       const matchCat = selectedCategory === "all" || p.cat === selectedCategory;
       const q = searchQuery.trim().toLowerCase();
       const matchSearch =
@@ -47,7 +47,7 @@ export const ProductGrid: React.FC = () => {
     }
 
     return list;
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [products, selectedCategory, searchQuery, sortBy]);
 
   return (
     <section id="toy-catalog" className="py-12 px-4 max-w-7xl mx-auto">
@@ -55,7 +55,7 @@ export const ProductGrid: React.FC = () => {
       <CategoryArcade />
 
       {/* Search and Sort Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 my-6 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 my-6 bg-white/90 dark:bg-slate-900/60 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         {/* Search Bar */}
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -64,7 +64,7 @@ export const ProductGrid: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 focus:border-emerald-500 text-sm text-white placeholder-slate-500 outline-none transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all"
           />
           {searchQuery && (
             <button
@@ -72,7 +72,7 @@ export const ProductGrid: React.FC = () => {
                 sounds.playPop();
                 setSearchQuery("");
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -82,14 +82,14 @@ export const ProductGrid: React.FC = () => {
         {/* Sort Filter Dropdown */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <ArrowUpDown className="w-4 h-4 text-toy-yellow" />
-          <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{t("sortBy")}:</span>
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">{t("sortBy")}:</span>
           <select
             value={sortBy}
             onChange={(e) => {
               sounds.playPop();
               setSortBy(e.target.value);
             }}
-            className="py-2 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-slate-200 outline-none focus:border-toy-yellow cursor-pointer"
+            className="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500 cursor-pointer"
           >
             <option value="featured">{t("sortFeatured")}</option>
             <option value="price-asc">{t("sortPriceAsc")}</option>
@@ -103,7 +103,7 @@ export const ProductGrid: React.FC = () => {
       {/* Section Title & Count */}
       <div className="flex items-center justify-between mb-6 px-1">
         <div>
-          <h2 className="text-2xl font-black text-white font-fredoka flex items-center gap-2">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white font-fredoka flex items-center gap-2">
             <span>{currentCategoryObj.icon}</span>
             <span>
               {selectedCategory === "all"

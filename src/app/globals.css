@@ -52,6 +52,19 @@ html:not(.dark) body {
   background: #10b981;
 }
 
+/* Light mode scrollbar */
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
 /* Hide scrollbar utility */
 .scrollbar-none::-webkit-scrollbar {
   display: none;

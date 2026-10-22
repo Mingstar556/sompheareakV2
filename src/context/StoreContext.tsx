@@ -1,9 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { CartItem, Currency, Language, Product, CustomBraceletItem, Voucher } from "@/types/store";
+import { CartItem, Currency, Language, Product, CustomBraceletItem, Voucher, CustomerOrder, OrderStatus } from "@/types/store";
 import { TRANSLATIONS } from "@/data/translations";
 import { AVAILABLE_VOUCHERS } from "@/data/vouchers";
+import { PRODUCTS } from "@/data/products";
 import { sounds } from "@/utils/audio";
 import confetti from "canvas-confetti";
 
@@ -60,8 +61,85 @@ interface StoreContextType {
   applyVoucherCode: (code: string) => boolean;
   removeVoucher: () => void;
 
+  products: Product[];
+  addProduct: (product: Omit<Product, 'id'>) => Product;
+  updateProduct: (id: string, updates: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+  resetProducts: () => void;
+
+  orders: CustomerOrder[];
+  saveOrder: (order: CustomerOrder) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  deleteOrder: (orderId: string) => void;
+
+  vouchers: Voucher[];
+  addVoucher: (voucher: Voucher) => void;
+  deleteVoucher: (code: string) => void;
+
   t: (key: keyof typeof TRANSLATIONS.en, params?: Record<string, string | number>) => string;
 }
+
+const INITIAL_DEMO_ORDERS: CustomerOrder[] = [
+  {
+    id: "ord-1001",
+    orderRef: "SR-8491",
+    customerName: "Sokha Mean",
+    customerPhone: "012 889 977",
+    telegramHandle: "@sokha_m",
+    province: "Phnom Penh",
+    address: "Street 2004, Sangkat Teuk Thla, Khan Sen Sok",
+    notes: "Please call 10 mins before arrival",
+    paymentMethod: "khqr",
+    items: [
+      {
+        id: "item-1",
+        quantity: 1,
+        product: PRODUCTS[0],
+      },
+      {
+        id: "item-2",
+        quantity: 2,
+        product: PRODUCTS[1],
+      },
+    ],
+    subtotalUsd: 24.3,
+    discountUsd: 1.5,
+    deliveryFeeUsd: 0,
+    totalUsd: 22.8,
+    totalKhr: 93480,
+    pointsEarned: 14,
+    voucherCodeApplied: "TOY15",
+    status: "confirmed",
+    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+  {
+    id: "ord-1002",
+    orderRef: "SR-9214",
+    customerName: "Dara Heng",
+    customerPhone: "097 554 123",
+    telegramHandle: "@dara_toylove",
+    province: "Siem Reap",
+    address: "Wat Bo Road, Krong Siem Reap",
+    notes: "Deliver in the afternoon please",
+    paymentMethod: "cod",
+    items: [
+      {
+        id: "item-3",
+        quantity: 1,
+        product: PRODUCTS[2],
+      },
+    ],
+    subtotalUsd: 16.5,
+    discountUsd: 0,
+    deliveryFeeUsd: 1.5,
+    totalUsd: 18.0,
+    totalKhr: 73800,
+    pointsEarned: 10,
+    voucherCodeApplied: null,
+    status: "shipped",
+    createdAt: new Date(Date.now() - 3600000 * 22).toISOString(),
+  },
+];
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
@@ -70,6 +148,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [language, setLanguageState] = useState<Language>("en");
   const [themeMode, setThemeModeState] = useState<"dark" | "light">("dark");
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(true);
+
+  const [products, setProductsState] = useState<Product[]>(PRODUCTS);
+  const [orders, setOrdersState] = useState<CustomerOrder[]>([]);
+  const [vouchers, setVouchersState] = useState<Voucher[]>(AVAILABLE_VOUCHERS);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
@@ -122,6 +204,43 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const savedPts = localStorage.getItem("somphea_points");
       if (savedPts) {
         setUserPoints(parseInt(savedPts, 10));
+      }
+
+      const savedProds = localStorage.getItem("somphea_products");
+      if (savedProds) {
+        try {
+          const parsed = JSON.parse(savedProds);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setProductsState(parsed);
+          }
+        } catch {}
+      }
+
+      const savedOrders = localStorage.getItem("somphea_orders");
+      if (savedOrders) {
+        try {
+          const parsed = JSON.parse(savedOrders);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setOrdersState(parsed);
+          } else {
+            setOrdersState(INITIAL_DEMO_ORDERS);
+          }
+        } catch {
+          setOrdersState(INITIAL_DEMO_ORDERS);
+        }
+      } else {
+        setOrdersState(INITIAL_DEMO_ORDERS);
+        localStorage.setItem("somphea_orders", JSON.stringify(INITIAL_DEMO_ORDERS));
+      }
+
+      const savedVouchers = localStorage.getItem("somphea_vouchers");
+      if (savedVouchers) {
+        try {
+          const parsed = JSON.parse(savedVouchers);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setVouchersState(parsed);
+          }
+        } catch {}
       }
     } catch {
       // ignore SSR or storage exceptions
@@ -363,6 +482,81 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [language]
   );
 
+  // Admin & Catalog Management
+  const addProduct = useCallback((newProd: Omit<Product, "id">): Product => {
+    const id = `toy-${Date.now()}`;
+    const product: Product = { ...newProd, id };
+    setProductsState((prev) => {
+      const updated = [product, ...prev];
+      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      return updated;
+    });
+    return product;
+  }, []);
+
+  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
+    setProductsState((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
+      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const deleteProduct = useCallback((id: string) => {
+    setProductsState((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const resetProducts = useCallback(() => {
+    setProductsState(PRODUCTS);
+    localStorage.setItem("somphea_products", JSON.stringify(PRODUCTS));
+  }, []);
+
+  // Customer Orders Management
+  const saveOrder = useCallback((order: CustomerOrder) => {
+    setOrdersState((prev) => {
+      const updated = [order, ...prev];
+      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const updateOrderStatus = useCallback((orderId: string, status: OrderStatus) => {
+    setOrdersState((prev) => {
+      const updated = prev.map((o) => (o.id === orderId ? { ...o, status } : o));
+      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const deleteOrder = useCallback((orderId: string) => {
+    setOrdersState((prev) => {
+      const updated = prev.filter((o) => o.id !== orderId);
+      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  // Voucher Management
+  const addVoucher = useCallback((voucher: Voucher) => {
+    setVouchersState((prev) => {
+      const updated = [voucher, ...prev.filter((v) => v.code !== voucher.code)];
+      localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const deleteVoucher = useCallback((code: string) => {
+    setVouchersState((prev) => {
+      const updated = prev.filter((v) => v.code !== code);
+      localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <StoreContext.Provider
       value={{
@@ -407,6 +601,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeVoucher,
         applyVoucherCode,
         removeVoucher,
+        products,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        resetProducts,
+        orders,
+        saveOrder,
+        updateOrderStatus,
+        deleteOrder,
+        vouchers,
+        addVoucher,
+        deleteVoucher,
         t,
       }}
     >

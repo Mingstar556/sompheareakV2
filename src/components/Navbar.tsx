@@ -46,7 +46,7 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/85 dark:bg-slate-950/85 light:bg-white/85 backdrop-blur-xl border-b border-slate-800/80 transition-colors">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <a
@@ -70,27 +70,27 @@ export const Navbar: React.FC = () => {
 
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-fredoka tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+              <span className="text-xl sm:text-2xl font-black font-fredoka tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                 SOMPHEA REAK
               </span>
               <span className="px-2 py-0.5 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
                 V2
               </span>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wide uppercase">
               សម្ភារៈ • Toy & Charm Studio
             </p>
           </div>
         </a>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800/80">
+        <nav className="hidden lg:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-900/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800/80">
           {navLinks.map((link) => (
             <a
               key={link.label}
               href={link.href}
               onClick={() => sounds.playPop()}
-              className="px-4 py-2 rounded-xl text-xs font-black text-slate-300 hover:text-white hover:bg-slate-800 transition-all font-fredoka flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-black text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all font-fredoka flex items-center gap-1.5"
             >
               <span>{link.icon}</span>
               <span>{link.label}</span>
@@ -106,27 +106,27 @@ export const Navbar: React.FC = () => {
               sounds.playPop();
               setRewardsModalOpen(true);
             }}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-toy-yellow/20 to-amber-500/20 border border-toy-yellow/40 hover:border-toy-yellow text-toy-yellow text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-sm font-fredoka"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/15 dark:bg-gradient-to-r dark:from-toy-yellow/20 dark:to-amber-500/20 border border-amber-500/40 hover:border-amber-500 text-amber-700 dark:text-toy-yellow text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-sm font-fredoka"
             title="VIP Rewards Club"
           >
-            <Trophy className="w-3.5 h-3.5 fill-toy-yellow" />
+            <Trophy className="w-3.5 h-3.5 fill-amber-500 dark:fill-toy-yellow text-amber-500 dark:text-toy-yellow" />
             <span>{userPoints} pt</span>
           </button>
 
           {/* Currency Switcher ($ / ៛) */}
           <button
             onClick={toggleCurrency}
-            className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-toy-purple text-xs font-black text-slate-200 transition-all active:scale-95 flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1 shadow-sm"
             title="Toggle Currency (USD / KHR)"
           >
-            <span className="text-toy-yellow font-black">{currency === "USD" ? "$" : "៛"}</span>
+            <span className="text-amber-500 dark:text-toy-yellow font-black">{currency === "USD" ? "$" : "៛"}</span>
             <span className="text-[11px] font-bold">{currency}</span>
           </button>
 
           {/* Language Switcher (EN / KM) */}
           <button
             onClick={toggleLanguage}
-            className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-toy-cyan text-xs font-black text-slate-200 transition-all active:scale-95 flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm"
             title="Toggle Language (English / Khmer)"
           >
             <span className="text-sm">{language === "en" ? "🇬🇧" : "🇰🇭"}</span>
@@ -136,10 +136,10 @@ export const Navbar: React.FC = () => {
           {/* Sound FX Toggle (🔊 / 🔇) */}
           <button
             onClick={toggleSound}
-            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all active:scale-95 ${
+            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all active:scale-95 shadow-sm ${
               soundEnabled
-                ? "bg-slate-900 border-slate-800 text-toy-green hover:border-toy-green"
-                : "bg-slate-900 border-slate-800 text-slate-500"
+                ? "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-600 dark:text-toy-green hover:border-emerald-500"
+                : "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500"
             }`}
             title={soundEnabled ? "Sound Effects Enabled" : "Sound Effects Muted"}
           >
@@ -149,7 +149,7 @@ export const Navbar: React.FC = () => {
           {/* Theme Toggle (🌙 / ☀️) */}
           <button
             onClick={toggleTheme}
-            className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-toy-yellow flex items-center justify-center text-slate-300 transition-all active:scale-95"
+            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-amber-400 flex items-center justify-center text-slate-700 dark:text-slate-300 transition-all active:scale-95 shadow-sm"
             title="Toggle Dark / Light Theme"
           >
             {themeMode === "dark" ? (
@@ -185,7 +185,7 @@ export const Navbar: React.FC = () => {
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300"
+            className="lg:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -199,7 +199,7 @@ export const Navbar: React.FC = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2"
+            className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2 shadow-xl"
           >
             {navLinks.map((link) => (
               <a
@@ -209,21 +209,21 @@ export const Navbar: React.FC = () => {
                   sounds.playPop();
                   setMobileMenuOpen(false);
                 }}
-                className="block px-4 py-2.5 rounded-xl text-sm font-black text-slate-200 hover:bg-slate-900 font-fredoka flex items-center gap-2"
+                className="block px-4 py-2.5 rounded-xl text-sm font-black text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 font-fredoka flex items-center gap-2"
               >
                 <span>{link.icon}</span>
                 <span>{link.label}</span>
               </a>
             ))}
-            <div className="pt-2 border-t border-slate-850 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-400">VIP Points:</span>
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-850 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">VIP Points:</span>
               <button
                 onClick={() => {
                   sounds.playPop();
                   setRewardsModalOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="px-3 py-1 rounded-xl bg-toy-yellow/20 text-toy-yellow font-black text-xs border border-toy-yellow/30 font-fredoka"
+                className="px-3 py-1 rounded-xl bg-amber-500/15 dark:bg-toy-yellow/20 text-amber-700 dark:text-toy-yellow font-black text-xs border border-amber-500/30 dark:border-toy-yellow/30 font-fredoka"
               >
                 ⭐ {userPoints} pt (Claim Rewards)
               </button>

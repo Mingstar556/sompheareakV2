@@ -32,7 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="group relative bg-slate-900/90 dark:bg-slate-900/90 light:bg-white border-2 border-slate-800 hover:border-emerald-500/50 rounded-3xl p-4 shadow-toy-card transition-all flex flex-col justify-between overflow-hidden"
+      className="group relative bg-white dark:bg-slate-900/90 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500/50 rounded-3xl p-4 shadow-toy-card transition-all flex flex-col justify-between overflow-hidden"
     >
       {/* Top Badges */}
       <div className="absolute top-6 left-6 z-10 flex flex-col gap-1.5 pointer-events-none">
@@ -71,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           sounds.playPop();
           setQuickViewProduct(product);
         }}
-        className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-950/50 cursor-pointer mb-3"
+        className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950/50 cursor-pointer mb-3 border border-slate-200/60 dark:border-transparent"
       >
         <Image
           src={product.image}
@@ -94,12 +94,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div>
           {/* Star Rating & Points Tag */}
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <div className="flex items-center gap-1 text-toy-yellow font-bold">
-              <Star className="w-3.5 h-3.5 fill-toy-yellow" />
+            <div className="flex items-center gap-1 text-amber-500 dark:text-toy-yellow font-bold">
+              <Star className="w-3.5 h-3.5 fill-amber-500 dark:fill-toy-yellow" />
               <span>{product.rating || 4.9}</span>
-              <span className="text-slate-500 text-[10px]">({product.reviewsCount || 42})</span>
+              <span className="text-slate-400 dark:text-slate-500 text-[10px]">({product.reviewsCount || 42})</span>
             </div>
-            <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/70 px-2 py-0.5 rounded-full border border-emerald-700/40">
+            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700/40">
               +{product.pt} VIP pt
             </span>
           </div>
@@ -109,23 +109,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               sounds.playPop();
               setQuickViewProduct(product);
             }}
-            className="text-base font-black text-white hover:text-emerald-400 transition-colors font-fredoka line-clamp-1 cursor-pointer"
+            className="text-base font-black text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-fredoka line-clamp-1 cursor-pointer"
           >
             {language === "km" ? product.nameKh : product.name}
           </h3>
-          <p className="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
             {language === "km" ? product.bioKh : product.bio}
           </p>
         </div>
 
         {/* Pricing & Add to Cart */}
-        <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
           <div>
-            <div className="text-lg font-black text-toy-yellow font-fredoka leading-none">
+            <div className="text-lg font-black text-amber-600 dark:text-toy-yellow font-fredoka leading-none">
               {prices.discounted}
             </div>
             {product.discount > 0 && (
-              <div className="text-[11px] line-through text-slate-500 font-bold mt-0.5">
+              <div className="text-[11px] line-through text-slate-400 dark:text-slate-500 font-bold mt-0.5">
                 {prices.original}
               </div>
             )}
@@ -137,7 +137,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 sounds.playPop();
                 setViewer3DProduct(product);
               }}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 hover:border-emerald-500 transition-all"
+              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-slate-300 dark:border-slate-700 hover:border-emerald-500 transition-all"
               title="3D Inspection"
             >
               <Box className="w-4 h-4" />

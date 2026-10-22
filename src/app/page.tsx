@@ -34,7 +34,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#0b0f19] dark:bg-[#0b0f19] light:bg-[#f8fafc] text-white selection:bg-emerald-600 selection:text-white relative">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white relative transition-colors duration-200">
       {/* 1. Top Announcement Bar */}
       <AnnouncementBar />
 
@@ -69,19 +69,19 @@ export default function HomePage() {
 
       {/* 8. VIP Toy Club Rewards Callout Banner */}
       <section className="py-12 px-4 max-w-5xl mx-auto my-8">
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-slate-900/95 via-emerald-950/80 to-slate-900/95 border-2 border-emerald-500/50 shadow-toy-green-glow text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-emerald-100 via-green-50 to-teal-100 dark:from-slate-900/95 dark:via-emerald-950/80 dark:to-slate-900/95 border-2 border-emerald-400 dark:border-emerald-500/50 shadow-toy-green-glow text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden transition-colors duration-200">
           {/* Background sparkles */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
 
           <div className="space-y-2 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-black text-xs font-fredoka uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600 text-white font-black text-xs font-fredoka uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5" />
               <span>Somphea Reak VIP Club</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-white font-fredoka">
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-fredoka">
               Earn Rewards & Free Vouchers on Every Drop!
             </h3>
-            <p className="text-xs sm:text-sm text-slate-200 max-w-md font-medium">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 max-w-md font-medium">
               Collect 25 points to redeem an instant 10% OFF voucher. Get +10 Welcome Points immediately on your first visit!
             </p>
           </div>

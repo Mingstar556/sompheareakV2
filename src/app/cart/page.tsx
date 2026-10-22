@@ -47,6 +47,7 @@ export default function CartPage() {
     applyVoucherCode,
     removeVoucher,
     addPoints,
+    saveOrder,
     language,
     t,
   } = useStore();
@@ -167,6 +168,29 @@ export default function CartPage() {
     });
 
     addPoints(totalPoints);
+
+    // Save order for owner admin panel management
+    saveOrder({
+      id: `ord-${Date.now()}`,
+      orderRef,
+      customerName: form.fullName,
+      customerPhone: form.phone,
+      telegramHandle: form.telegramHandle,
+      province: form.province,
+      address: form.address,
+      paymentMethod: form.paymentMethod,
+      items: [...cart],
+      subtotalUsd,
+      discountUsd,
+      deliveryFeeUsd,
+      totalUsd,
+      totalKhr: Math.round(totalUsd * 4100),
+      pointsEarned: totalPoints,
+      voucherCodeApplied: activeVoucher?.code || null,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
+
     setSubmittedOrder({
       orderRef,
       telegramUrl: shareUrl,
@@ -177,7 +201,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] dark:bg-[#0b0f19] light:bg-[#f8fafc] text-white selection:bg-toy-pink selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white flex flex-col justify-between transition-colors duration-200">
       <div>
         <AnnouncementBar />
         <Navbar />
@@ -189,21 +213,20 @@ export default function CartPage() {
               <Link
                 href="/#toy-catalog"
                 onClick={() => sounds.playPop()}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-toy-cyan hover:underline mb-2"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-toy-cyan hover:underline mb-2"
               >
                 <span>{t("continueShopping")}</span>
               </Link>
-              <h1 className="text-3xl sm:text-4xl font-black text-white font-fredoka flex items-center gap-3">
-                <ShoppingBag className="w-8 h-8 text-toy-pink" />
-                <span>{t("cartPageTitle")}</span>
+              <h1 className="text-3xl sm:text-4xl font-black font-fredoka text-slate-900 dark:text-white">
+                {t("cartPageTitle")}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 {t("cartPageSubtitle")}
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-bold text-toy-yellow font-fredoka">
+              <span className="px-3 py-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-amber-600 dark:text-toy-yellow font-fredoka shadow-sm">
                 {t("itemsInCart", { n: cart.reduce((s, i) => s + i.quantity, 0) })}
               </span>
             </div>
@@ -212,12 +235,12 @@ export default function CartPage() {
           {!submittedOrder ? (
             cart.length === 0 ? (
               /* Empty Cart State */
-              <div className="py-20 px-4 text-center rounded-3xl bg-slate-900/60 border-2 border-dashed border-slate-800 max-w-2xl mx-auto my-6">
+              <div className="py-20 px-4 text-center rounded-3xl bg-white dark:bg-slate-900/60 border-2 border-dashed border-slate-300 dark:border-slate-800 max-w-2xl mx-auto my-6 shadow-sm">
                 <span className="text-6xl block mb-4">🧸</span>
-                <h2 className="text-2xl font-black text-white font-fredoka mb-2">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white font-fredoka mb-2">
                   {t("cartEmpty")}
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-6">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto mb-6">
                   {t("emptyCartNotice")}
                 </p>
                 <Link
@@ -232,13 +255,13 @@ export default function CartPage() {
             ) : (
               /* Multi-Item Cart & Checkout Grid */
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* Left Column (8 cols): Items List */}
+                {/* Left Column (7 cols): Items List */}
                 <div className="lg:col-span-7 space-y-4">
                   {/* Free Delivery Meter */}
-                  <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
+                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="flex items-center justify-between text-xs font-bold mb-2">
-                      <span className="flex items-center gap-1.5 text-slate-300">
-                        <Truck className="w-4 h-4 text-toy-cyan" />
+                      <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                        <Truck className="w-4 h-4 text-emerald-600 dark:text-toy-cyan" />
                         <span>
                           {freeShippingProgress >= 100
                             ? t("freeDeliveryEligible")
@@ -247,13 +270,13 @@ export default function CartPage() {
                               })}
                         </span>
                       </span>
-                      <span className="text-toy-green font-black">{Math.round(freeShippingProgress)}%</span>
+                      <span className="text-emerald-600 dark:text-toy-green font-black">{Math.round(freeShippingProgress)}%</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${freeShippingProgress}%` }}
-                        className="h-full rounded-full bg-gradient-to-r from-toy-cyan via-toy-green to-emerald-400"
+                        className="h-full rounded-full bg-gradient-to-r from-teal-400 via-emerald-500 to-green-600"
                       />
                     </div>
                   </div>
@@ -275,11 +298,11 @@ export default function CartPage() {
                       return (
                         <div
                           key={item.id}
-                          className="p-4 rounded-3xl bg-slate-900 border-2 border-slate-800 hover:border-slate-700 transition-all flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
+                          className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-slate-700 transition-all flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shadow-sm"
                         >
                           <div className="flex items-center gap-4 flex-1 min-w-0">
                             {/* Thumbnail */}
-                            <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 flex-shrink-0">
+                            <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 flex-shrink-0">
                               <Image
                                 src={
                                   item.product
@@ -295,7 +318,7 @@ export default function CartPage() {
                             {/* Item Details */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <h3 className="text-base font-black text-white font-fredoka truncate">
+                                <h3 className="text-base font-black text-slate-900 dark:text-white font-fredoka truncate">
                                   {item.product
                                     ? language === "km"
                                       ? item.product.nameKh
@@ -306,7 +329,7 @@ export default function CartPage() {
 
                               {item.customBracelet ? (
                                 <div className="mt-1">
-                                  <div className="flex items-center gap-2 text-xs text-toy-pink font-bold">
+                                  <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-toy-pink font-bold">
                                     <span className="uppercase">
                                       {item.customBracelet.finish} INOX
                                     </span>
@@ -332,16 +355,16 @@ export default function CartPage() {
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                                   {item.product?.bio}
                                 </p>
                               )}
 
                               <div className="mt-2 flex items-center gap-3">
-                                <span className="text-base font-black text-toy-yellow font-fredoka">
+                                <span className="text-base font-black text-amber-600 dark:text-toy-yellow font-fredoka">
                                   {formatPrice(lineTotal, currency)}
                                 </span>
-                                <span className="text-[11px] font-bold text-toy-green bg-toy-green/10 px-2 py-0.5 rounded-full border border-toy-green/20">
+                                <span className="text-[11px] font-bold text-emerald-700 dark:text-toy-green bg-emerald-100 dark:bg-toy-green/10 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-toy-green/20">
                                   +{linePoints} VIP pt
                                 </span>
                               </div>
@@ -349,28 +372,28 @@ export default function CartPage() {
                           </div>
 
                           {/* Controls */}
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                          <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800">
                             <button
                               onClick={() => removeFromCart(item.id)}
-                              className="text-slate-400 hover:text-toy-pink transition-colors p-1"
+                              className="text-slate-400 hover:text-rose-500 transition-colors p-1"
                               title="Remove item"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
 
-                            <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl p-1">
+                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl p-1">
                               <button
                                 onClick={() => updateQuantity(item.id, -1)}
-                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               >
                                 <Minus className="w-3.5 h-3.5" />
                               </button>
-                              <span className="text-xs font-black text-white px-1">
+                              <span className="text-xs font-black text-slate-900 dark:text-white px-1">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, 1)}
-                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                               </button>
@@ -385,10 +408,10 @@ export default function CartPage() {
                 {/* Right Column (5 cols): Checkout Form & Order Summary */}
                 <div className="lg:col-span-5 space-y-5">
                   {/* Order Summary Box */}
-                  <div className="p-6 rounded-3xl bg-slate-900 border-2 border-emerald-600/40 shadow-xl space-y-4">
-                    <h3 className="text-lg font-black text-white font-fredoka flex items-center justify-between">
+                  <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-emerald-500/40 shadow-xl space-y-4">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white font-fredoka flex items-center justify-between">
                       <span>{t("orderSummary")}</span>
-                      <span className="text-xs text-emerald-400 font-bold">
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                         +{totalPoints} VIP Points
                       </span>
                     </h3>
@@ -396,8 +419,8 @@ export default function CartPage() {
                     {/* Voucher Input */}
                     <div>
                       {activeVoucher ? (
-                        <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/40 text-xs">
-                          <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                        <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-500/40 text-xs">
+                          <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-bold">
                             <Tag className="w-4 h-4" />
                             <span>
                               {language === "km"
@@ -407,7 +430,7 @@ export default function CartPage() {
                           </div>
                           <button
                             onClick={removeVoucher}
-                            className="text-toy-pink hover:underline font-bold text-xs"
+                            className="text-rose-600 dark:text-toy-pink hover:underline font-bold text-xs"
                           >
                             Remove
                           </button>
@@ -419,7 +442,7 @@ export default function CartPage() {
                             value={voucherInput}
                             onChange={(e) => setVoucherInput(e.target.value)}
                             placeholder="Enter Voucher Code (e.g. TOY15)"
-                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-xs text-white placeholder-slate-500 outline-none uppercase"
+                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 focus:border-emerald-500 text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none uppercase"
                           />
                           <button
                             type="submit"
@@ -430,18 +453,18 @@ export default function CartPage() {
                         </form>
                       )}
                       {voucherError && (
-                        <p className="text-[11px] text-toy-pink mt-1">{voucherError}</p>
+                        <p className="text-[11px] text-rose-600 dark:text-toy-pink mt-1">{voucherError}</p>
                       )}
                     </div>
 
                     {/* Cost Calculation */}
-                    <div className="space-y-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
+                    <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-200 dark:border-slate-800">
                       <div className="flex justify-between">
                         <span>{t("subtotal")}:</span>
                         <span className="font-bold">{formatPrice(subtotalUsd, currency)}</span>
                       </div>
                       {discountUsd > 0 && (
-                        <div className="flex justify-between text-toy-green font-bold">
+                        <div className="flex justify-between text-emerald-600 dark:text-toy-green font-bold">
                           <span>Voucher Discount:</span>
                           <span>-{formatPrice(discountUsd, currency)}</span>
                         </div>
@@ -452,9 +475,9 @@ export default function CartPage() {
                           {deliveryFeeUsd === 0 ? "FREE" : formatPrice(deliveryFeeUsd, currency)}
                         </span>
                       </div>
-                      <div className="flex justify-between pt-3 border-t border-slate-800 text-base font-black text-white">
+                      <div className="flex justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-base font-black text-slate-900 dark:text-white">
                         <span className="font-fredoka">{t("total")}:</span>
-                        <span className="text-toy-yellow font-fredoka text-2xl">
+                        <span className="text-amber-600 dark:text-toy-yellow font-fredoka text-2xl">
                           {formatPrice(totalUsd, currency)}
                         </span>
                       </div>
@@ -462,16 +485,16 @@ export default function CartPage() {
                   </div>
 
                   {/* Multi-Item Direct Telegram Checkout Form */}
-                  <div className="p-6 rounded-3xl bg-slate-900 border-2 border-toy-cyan/40 shadow-xl space-y-4">
-                    <div className="flex items-center gap-2 text-toy-cyan font-bold text-xs uppercase tracking-wider">
+                  <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-emerald-500/40 shadow-xl space-y-4">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-toy-cyan font-bold text-xs uppercase tracking-wider">
                       <ShieldCheck className="w-4 h-4" />
                       <span>{t("checkoutTitle")}</span>
                     </div>
 
                     <form onSubmit={handleCheckoutSubmit} className="space-y-3.5">
                       <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-toy-cyan" />
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-cyan" />
                           <span>{t("fullName")} *</span>
                         </label>
                         <input
@@ -480,14 +503,14 @@ export default function CartPage() {
                           value={form.fullName}
                           onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                           placeholder="e.g. Chan Dara / Sokha"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-toy-cyan outline-none"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
-                          <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-toy-green" />
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-green" />
                             <span>{t("phoneNumber")} *</span>
                           </label>
                           <input
@@ -496,12 +519,12 @@ export default function CartPage() {
                             value={form.phone}
                             onChange={(e) => setForm({ ...form, phone: e.target.value })}
                             placeholder="012 345 678"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-toy-cyan outline-none"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5 text-toy-cyan" />
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center gap-1.5">
+                            <MessageCircle className="w-3.5 h-3.5 text-teal-600 dark:text-toy-cyan" />
                             <span>{t("telegramHandle")}</span>
                           </label>
                           <input
@@ -509,20 +532,20 @@ export default function CartPage() {
                             value={form.telegramHandle}
                             onChange={(e) => setForm({ ...form, telegramHandle: e.target.value })}
                             placeholder="@username"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-toy-cyan outline-none"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-toy-pink" />
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-pink" />
                           <span>{t("province")}</span>
                         </label>
                         <select
                           value={form.province}
                           onChange={(e) => setForm({ ...form, province: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-toy-cyan outline-none cursor-pointer"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none cursor-pointer"
                         >
                           {cambodiaProvinces.map((prov) => (
                             <option key={prov} value={prov}>
@@ -533,7 +556,7 @@ export default function CartPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                           {t("streetAddress")} *
                         </label>
                         <textarea
@@ -542,13 +565,13 @@ export default function CartPage() {
                           value={form.address}
                           onChange={(e) => setForm({ ...form, address: e.target.value })}
                           placeholder="Street, Sangkat, Khan, Landmark..."
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-toy-cyan outline-none resize-none"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none resize-none"
                         />
                       </div>
 
                       {/* Payment Method */}
                       <div>
-                        <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                           {t("paymentMethod")}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -560,8 +583,8 @@ export default function CartPage() {
                             }}
                             className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
                               form.paymentMethod === "cod"
-                                ? "bg-toy-yellow/20 border-toy-yellow text-white shadow-sm"
-                                : "bg-slate-950 border-slate-800 text-slate-400"
+                                ? "bg-amber-100 dark:bg-toy-yellow/20 border-amber-500 dark:border-toy-yellow text-amber-900 dark:text-white shadow-sm"
+                                : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
                             }`}
                           >
                             {t("cod")}
@@ -574,8 +597,8 @@ export default function CartPage() {
                             }}
                             className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
                               form.paymentMethod === "khqr"
-                                ? "bg-toy-cyan/20 border-toy-cyan text-white shadow-sm"
-                                : "bg-slate-950 border-slate-800 text-slate-400"
+                                ? "bg-emerald-100 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-white shadow-sm"
+                                : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
                             }`}
                           >
                             {t("khqr")}
@@ -598,31 +621,31 @@ export default function CartPage() {
             )
           ) : (
             /* Order Submitted Success View */
-            <div className="text-center py-12 max-w-lg mx-auto bg-slate-900 border-2 border-toy-green/50 rounded-3xl p-8 shadow-2xl">
-              <div className="w-20 h-20 rounded-3xl bg-toy-green/20 text-toy-green flex items-center justify-center mx-auto mb-4 border border-toy-green/40 shadow-toy-glow">
+            <div className="text-center py-12 max-w-lg mx-auto bg-white dark:bg-slate-900 border-2 border-emerald-500 rounded-3xl p-8 shadow-2xl">
+              <div className="w-20 h-20 rounded-3xl bg-emerald-100 dark:bg-toy-green/20 text-emerald-600 dark:text-toy-green flex items-center justify-center mx-auto mb-4 border border-emerald-300 dark:border-toy-green/40 shadow-toy-glow">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
 
-              <span className="text-xs font-bold text-toy-yellow uppercase tracking-widest">
+              <span className="text-xs font-bold text-amber-600 dark:text-toy-yellow uppercase tracking-widest">
                 Order Ref: {submittedOrder.orderRef}
               </span>
-              <h2 className="text-3xl font-black font-fredoka text-white mt-1">
+              <h2 className="text-3xl font-black font-fredoka text-slate-900 dark:text-white mt-1">
                 {t("orderSuccessTitle")}
               </h2>
-              <p className="text-xs text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">
                 {t("orderSuccessNotice")}
               </p>
 
-              <div className="my-6 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs space-y-2">
-                <div className="flex justify-between text-slate-400">
+              <div className="my-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-2">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>Total Amount:</span>
-                  <span className="font-bold text-toy-yellow text-sm">
+                  <span className="font-bold text-amber-600 dark:text-toy-yellow text-sm">
                     {formatPrice(submittedOrder.totalUsd, currency)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>VIP Points Earned:</span>
-                  <span className="font-bold text-toy-green">+{submittedOrder.points} pt</span>
+                  <span className="font-bold text-emerald-600 dark:text-toy-green">+{submittedOrder.points} pt</span>
                 </div>
               </div>
 
@@ -640,7 +663,7 @@ export default function CartPage() {
               <Link
                 href="/#toy-catalog"
                 onClick={() => sounds.playPop()}
-                className="inline-block mt-4 text-xs text-slate-400 hover:text-white font-bold"
+                className="inline-block mt-4 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-bold"
               >
                 Return to Toys Catalog
               </Link>
