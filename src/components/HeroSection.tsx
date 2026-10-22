@@ -2,10 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift, Edit3 } from "lucide-react";
+import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift, Edit3, Zap } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { ThreeHeroCanvas } from "./ThreeHeroCanvas";
 import { sounds } from "@/utils/audio";
+import styles from "@/styles/ToyEffects.module.css";
 
 export const HeroSection: React.FC = () => {
   const { t, storefrontConfig, isLiveEditMode, setCopyModalOpen } = useStore();
@@ -42,6 +43,11 @@ export const HeroSection: React.FC = () => {
               <Sparkles className="w-4 h-4 text-amber-500 dark:text-toy-yellow animate-spin" style={{ animationDuration: "6s" }} />
               <span>{heroBadge}</span>
             </motion.div>
+
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 text-slate-950 font-black text-xs font-fredoka shadow-md animate-pulse">
+              <Zap className="w-3.5 h-3.5 fill-slate-950" />
+              <span>TRENDING TIKTOK 2026</span>
+            </span>
 
             {isLiveEditMode && (
               <button
@@ -138,6 +144,17 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="lg:col-span-6 xl:col-span-5 relative flex items-center justify-center"
         >
+          {/* Floating Toy Stickers */}
+          <div className={`${styles.floatingSticker} absolute -top-3.5 -right-3 z-30 hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black text-xs font-fredoka shadow-2xl border-2 border-white dark:border-slate-900 rotate-6 select-none`}>
+            <span>🔥</span>
+            <span>TOP TOY DROPS</span>
+          </div>
+
+          <div className={`${styles.floatingSticker} absolute -bottom-3.5 -left-3 z-30 hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-black text-xs font-fredoka shadow-2xl border-2 border-white dark:border-slate-900 -rotate-3 select-none`}>
+            <span>⭐</span>
+            <span>VIP COLLECTOR</span>
+          </div>
+
           {/* Glassmorphic 3D Card Backdrop */}
           <div className="w-full relative rounded-3xl bg-gradient-to-b from-white/90 via-slate-100/70 to-emerald-50/60 dark:from-slate-900/80 dark:via-slate-900/40 dark:to-emerald-950/40 border-2 border-emerald-500/40 shadow-2xl p-2 overflow-hidden backdrop-blur-md transition-colors duration-200">
             {/* Top Interactive Indicator */}

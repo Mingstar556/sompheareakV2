@@ -131,7 +131,7 @@ export const CustomBraceletStudio: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Interconnected Ribbon Workbench */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-xl space-y-6 transition-colors duration-200">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-xl space-y-5 sm:space-y-6 transition-colors duration-200">
           {/* Top Finish & Size Configuration */}
           <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">
             <div>
@@ -187,10 +187,11 @@ export const CustomBraceletStudio: React.FC = () => {
               </div>
               <button
                 onClick={handleClearAll}
-                className="text-rose-600 dark:text-toy-pink hover:underline font-bold text-xs flex items-center gap-1"
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-300 font-black text-xs flex items-center gap-1.5 border border-rose-200 dark:border-rose-800/60 shadow-sm active:scale-95 transition-all"
+                title="Make bracelet empty (reset all charms to blank stainless steel)"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>{t("clearAllLinks")}</span>
+                <span>Empty Bracelet (All Blank Links) 🔗</span>
               </button>
             </div>
 
@@ -279,7 +280,7 @@ export const CustomBraceletStudio: React.FC = () => {
         </div>
 
         {/* Right Column: Charms Catalog & Instant Snap */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between transition-colors duration-200">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border-2 border-emerald-500/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col justify-between transition-colors duration-200">
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-black text-slate-900 dark:text-white font-fredoka">Tap to Connect Charms</h3>

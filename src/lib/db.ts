@@ -24,88 +24,9 @@ const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
   freeDeliveryThreshold: 25.0,
 };
 
-const INITIAL_DEMO_ORDERS: CustomerOrder[] = [
-  {
-    id: "ord-1001",
-    orderRef: "SR-8491",
-    customerName: "Sokha Mean",
-    customerPhone: "012 889 977",
-    telegramHandle: "@sokha_m",
-    province: "Phnom Penh",
-    address: "Street 2004, Sangkat Teuk Thla, Khan Sen Sok",
-    notes: "Please call 10 mins before arrival",
-    paymentMethod: "khqr",
-    items: [
-      {
-        id: "item-1",
-        quantity: 1,
-        product: PRODUCTS[0],
-      },
-      {
-        id: "item-2",
-        quantity: 2,
-        product: PRODUCTS[1],
-      },
-    ],
-    subtotalUsd: 24.3,
-    discountUsd: 0,
-    deliveryFeeUsd: 1.5,
-    totalUsd: 25.8,
-    totalKhr: 105780,
-    pointsEarned: 14,
-    voucherCodeApplied: null,
-    status: "confirmed",
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-  },
-  {
-    id: "ord-1002",
-    orderRef: "SR-9204",
-    customerName: "Chan Dara",
-    customerPhone: "098 765 432",
-    telegramHandle: "@dara_toylover",
-    province: "Siem Reap",
-    address: "National Road 6, Svay Dangkum",
-    notes: "Leave package at reception if unavailable",
-    paymentMethod: "cod",
-    items: [
-      {
-        id: "item-3",
-        quantity: 1,
-        product: PRODUCTS[2],
-      },
-    ],
-    subtotalUsd: 11.6,
-    discountUsd: 1.16,
-    deliveryFeeUsd: 1.5,
-    totalUsd: 11.94,
-    totalKhr: 48954,
-    pointsEarned: 8,
-    voucherCodeApplied: "WELCOME10",
-    status: "pending",
-    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-  },
-];
+const INITIAL_DEMO_ORDERS: CustomerOrder[] = [];
 
-const INITIAL_NOTIFICATIONS: OrderNotification[] = [
-  {
-    id: "notif-1",
-    orderRef: "SR-8491",
-    title: "Order Confirmed: #SR-8491",
-    message: "Customer Sokha Mean's order of $25.80 has been confirmed. KHQR payment verified.",
-    type: "order_confirmed",
-    read: false,
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-  },
-  {
-    id: "notif-2",
-    orderRef: "SR-9204",
-    title: "New Order Placed: #SR-9204",
-    message: "New COD order from Chan Dara in Siem Reap ($11.94). Awaiting admin confirmation.",
-    type: "order_placed",
-    read: false,
-    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-  },
-];
+const INITIAL_NOTIFICATIONS: OrderNotification[] = [];
 
 // Initialize and Read Database
 export function getDb(): DatabaseSchema {

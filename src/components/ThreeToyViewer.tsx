@@ -104,14 +104,18 @@ export const ThreeToyViewer: React.FC<ThreeToyViewerProps> = ({ product, onClose
       lock.position.set(0, 0, 1.35);
       group.add(lock);
     } else if (product.cat === "bracelet") {
-      // 3D Italian Bracelet Ring with Links
+      // 3D Italian Modular Bracelet Ring with Clean Empty Stainless Links
       const linksCount = 17;
       const radius = 1.5;
+      const emptyInoxMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        metalness: 0.95,
+        roughness: 0.18,
+      });
       for (let i = 0; i < linksCount; i++) {
         const angle = (i / linksCount) * Math.PI * 2;
         const linkGeo = new THREE.BoxGeometry(0.5, 0.3, 0.15);
-        const linkMat = i % 4 === 0 ? accentMat : toyMat;
-        const link = new THREE.Mesh(linkGeo, linkMat);
+        const link = new THREE.Mesh(linkGeo, emptyInoxMat);
         link.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
         link.rotation.z = angle + Math.PI / 2;
         group.add(link);
@@ -327,6 +331,29 @@ export const ThreeToyViewer: React.FC<ThreeToyViewerProps> = ({ product, onClose
                   +{product.pt} VIP Points
                 </span>
               </div>
+
+              {/* Empty Inox Band Callout for Bracelets */}
+              {product.cat === "bracelet" && (
+                <div className="mt-4 p-3.5 rounded-2xl bg-emerald-950/70 border border-emerald-500/50 text-xs shadow-md">
+                  <div className="flex items-center gap-1.5 font-bold text-toy-green mb-1">
+                    <span>🔗</span>
+                    <span>Empty Italian Inox Band Base</span>
+                  </div>
+                  <p className="text-slate-300 text-[11px] leading-relaxed mb-2.5">
+                    Viewing the clean, blank 17-link stainless steel base (no charms attached). Open the studio to snap and customize your unique charms!
+                  </p>
+                  <a
+                    href="#custom-bracelet-studio"
+                    onClick={() => {
+                      sounds.playPop();
+                      onClose();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-xs font-fredoka shadow-toy-green-glow transition-all active:scale-95"
+                  >
+                    <span>Design in Charm Studio 🔗</span>
+                  </a>
+                </div>
+              )}
 
               {/* 3D Color Customizer */}
               <div className="mt-6">

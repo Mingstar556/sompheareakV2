@@ -146,6 +146,16 @@ export const ProductQuickViewModal: React.FC = () => {
                 </div>
               </div>
 
+              {product.cat === "bracelet" && (
+                <a
+                  href="#custom-bracelet-studio"
+                  onClick={handleClose}
+                  className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-toy-yellow/10 dark:hover:bg-toy-yellow/20 border border-amber-300 dark:border-toy-yellow/30 text-amber-800 dark:text-toy-yellow font-black text-xs flex items-center justify-center gap-1.5 transition-all font-fredoka shadow-sm"
+                >
+                  <span>Build Custom Empty Band in Studio 🔗</span>
+                </a>
+              )}
+
               <div className="flex gap-2">
                 <button
                   onClick={() => {
