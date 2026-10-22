@@ -213,6 +213,53 @@
   ],
   "orders": [
     {
+      "id": "ord-1792645961528",
+      "orderRef": "SR-AE4GGM",
+      "customerName": "Dara",
+      "customerPhone": "060206666",
+      "telegramHandle": "@Mingstar01",
+      "province": "Phnom Penh",
+      "address": "56B, st328",
+      "notes": "",
+      "paymentMethod": "cod",
+      "items": [
+        {
+          "id": "cart-toy-rc-neondrone-1792645921566",
+          "product": {
+            "id": "toy-rc-neondrone",
+            "name": "AeroGlow 360° Stunt Drone with LED Halo",
+            "nameKh": "ដ្រូនកាយសម្ព័ន្ធ AeroGlow ភ្លើងពណ៌ 360°",
+            "cat": "toy-universe",
+            "price": 18,
+            "discount": 25,
+            "stock": 12,
+            "pt": 10,
+            "image": "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80",
+            "bio": "Ultra-safe protected propeller cage drone! Perform one-button 360-degree mid-air flips, altitude lock hover, and dazzling rainbow night flights.",
+            "bioKh": "ដ្រូនក្មេងលេងមានរបាំងការពារសុវត្ថិភាព 100% អាចបង្វិលកាយសម្ព័ន្ធ 360 ដឺក្រេ និងមានភ្លើងព័ទ្ធជុំវិញស្រស់ស្អាតនៅពេលយប់។",
+            "rarity": "Legendary",
+            "rating": 4.9,
+            "reviewsCount": 78,
+            "featured": true,
+            "isNew": true,
+            "free_delivery": true,
+            "ageRecommendation": "Ages 8+",
+            "dimensions": "13cm x 13cm x 4cm"
+          },
+          "quantity": 1
+        }
+      ],
+      "subtotalUsd": 13.5,
+      "discountUsd": 0,
+      "deliveryFeeUsd": 1.5,
+      "totalUsd": 15,
+      "totalKhr": 61500,
+      "pointsEarned": 10,
+      "voucherCodeApplied": null,
+      "status": "confirmed",
+      "createdAt": "2026-10-22T05:12:41.528Z"
+    },
+    {
       "id": "ord-1001",
       "orderRef": "SR-8491",
       "customerName": "Sokha Mean",
@@ -380,6 +427,24 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif-1792646089219",
+      "orderRef": "SR-AE4GGM",
+      "title": "Order Confirmed: #SR-AE4GGM",
+      "message": "Order #SR-AE4GGM for Dara has been confirmed. Ready for packing!",
+      "type": "order_confirmed",
+      "read": false,
+      "createdAt": "2026-10-22T05:14:49.219Z"
+    },
+    {
+      "id": "notif-1792645961628",
+      "orderRef": "SR-AE4GGM",
+      "title": "New Order Placed: #SR-AE4GGM",
+      "message": "Dara placed order #SR-AE4GGM ($15.00) via COD. Deliver to Phnom Penh.",
+      "type": "order_placed",
+      "read": false,
+      "createdAt": "2026-10-22T05:12:41.628Z"
+    },
     {
       "id": "notif-1",
       "orderRef": "SR-8491",

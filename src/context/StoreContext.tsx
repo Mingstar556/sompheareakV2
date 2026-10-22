@@ -12,6 +12,7 @@ import {
   OrderStatus,
   OrderNotification,
   StorefrontConfig,
+  CustomerAccount,
 } from "@/types/store";
 import { TRANSLATIONS } from "@/data/translations";
 import { AVAILABLE_VOUCHERS } from "@/data/vouchers";
@@ -106,6 +107,21 @@ interface StoreContextType {
   setEditingDirectProduct: (p: Product | null) => void;
   copyModalOpen: boolean;
   setCopyModalOpen: (val: boolean) => void;
+
+  // Customer Account & Remember User System
+  customerUser: CustomerAccount | null;
+  isCustomerLoggedIn: boolean;
+  loginCustomer: (data: Omit<CustomerAccount, "id" | "createdAt"> & { rememberMe?: boolean }) => void;
+  logoutCustomer: () => void;
+  updateCustomerProfile: (data: Partial<CustomerAccount>) => void;
+
+  // History & Receipt Modals
+  accountModalOpen: boolean;
+  setAccountModalOpen: (open: boolean) => void;
+  orderHistoryModalOpen: boolean;
+  setOrderHistoryModalOpen: (open: boolean) => void;
+  selectedReceiptOrder: CustomerOrder | null;
+  setSelectedReceiptOrder: (order: CustomerOrder | null) => void;
 
   t: (key: keyof typeof TRANSLATIONS.en, params?: Record<string, string | number>) => string;
 }
@@ -241,6 +257,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [editingDirectProduct, setEditingDirectProduct] = useState<Product | null>(null);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
 
+  // Customer Account & Remember System
+  const [customerUser, setCustomerUserState] = useState<CustomerAccount | null>(null);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [orderHistoryModalOpen, setOrderHistoryModalOpen] = useState(false);
+  const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<CustomerOrder | null>(null);
+
   // Load persisted settings and sync with testing backend DB
   useEffect(() => {
     try {
@@ -289,6 +311,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setLiveEditMode(true);
         } else if (isAuth) {
           setIsAdminLoggedIn(true);
+        }
+
+        // Hydrate remembered customer user
+        const savedAccount = localStorage.getItem("somphea_customer_account");
+        if (savedAccount) {
+          try {
+            setCustomerUserState(JSON.parse(savedAccount));
+          } catch {}
         }
 
         // Fetch fresh database state from Testing Server API
@@ -681,9 +711,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const notif: OrderNotification = {
       id: `notif-${Date.now()}`,
       orderRef,
-      title: `Order #${orderRef} Updated: ${status.toUpperCase()}`,
-      message: `Warehouse tracking updated status to ${status.toUpperCase()} for order #${orderRef}.`,
-      type: status === "delivered" ? "order_delivered" : status === "shipped" ? "order_shipped" : "order_confirmed",
+      title:
+        status === "rejected"
+          ? `❌ Order #${orderRef} Rejected`
+          : status === "confirmed"
+          ? `🎉 Order #${orderRef} Confirmed!`
+          : `Order #${orderRef} Updated: ${status.toUpperCase()}`,
+      message:
+        status === "rejected"
+          ? `Order #${orderRef} was rejected. Please contact shop support via Telegram.`
+          : status === "confirmed"
+          ? `Order #${orderRef} for store delivery has been verified and confirmed!`
+          : `Warehouse tracking updated status to ${status.toUpperCase()} for order #${orderRef}.`,
+      type:
+        status === "delivered"
+          ? "order_delivered"
+          : status === "shipped"
+          ? "order_shipped"
+          : status === "rejected"
+          ? "order_rejected"
+          : "order_confirmed",
       read: false,
       createdAt: new Date().toISOString(),
     };
@@ -766,6 +813,52 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }).catch(() => {});
   }, []);
 
+  // Customer Account & Remember System Operations
+  const loginCustomer = useCallback((data: Omit<CustomerAccount, "id" | "createdAt"> & { rememberMe?: boolean }) => {
+    const account: CustomerAccount = {
+      id: `cust-${Date.now()}`,
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      telegramHandle: data.telegramHandle ? data.telegramHandle.trim() : "",
+      province: data.province || "Phnom Penh",
+      address: data.address || "",
+      rememberMe: data.rememberMe ?? true,
+      createdAt: new Date().toISOString(),
+    };
+    setCustomerUserState(account);
+    if (account.rememberMe) {
+      localStorage.setItem("somphea_customer_account", JSON.stringify(account));
+    } else {
+      localStorage.removeItem("somphea_customer_account");
+    }
+    sounds.playFanfare();
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  }, []);
+
+  const logoutCustomer = useCallback(() => {
+    sounds.playPop();
+    setCustomerUserState(null);
+    localStorage.removeItem("somphea_customer_account");
+  }, []);
+
+  const updateCustomerProfile = useCallback((updates: Partial<CustomerAccount>) => {
+    setCustomerUserState((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      if (updated.rememberMe) {
+        localStorage.setItem("somphea_customer_account", JSON.stringify(updated));
+      }
+      return updated;
+    });
+    sounds.playChime();
+  }, []);
+
+  const isCustomerLoggedIn = !!customerUser;
+
   return (
     <StoreContext.Provider
       value={{
@@ -838,6 +931,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setEditingDirectProduct,
         copyModalOpen,
         setCopyModalOpen,
+        customerUser,
+        isCustomerLoggedIn,
+        loginCustomer,
+        logoutCustomer,
+        updateCustomerProfile,
+        accountModalOpen,
+        setAccountModalOpen,
+        orderHistoryModalOpen,
+        setOrderHistoryModalOpen,
+        selectedReceiptOrder,
+        setSelectedReceiptOrder,
         t,
       }}
     >

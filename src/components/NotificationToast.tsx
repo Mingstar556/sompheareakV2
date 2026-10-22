@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/context/StoreContext";
-import { CheckCircle2, Package, Truck, Sparkles, X, Bell } from "lucide-react";
+import { CheckCircle2, Package, Truck, Sparkles, X, Bell, XCircle } from "lucide-react";
 
 export const NotificationToast: React.FC = () => {
   const { latestNotificationToast, dismissNotificationToast } = useStore();
@@ -20,6 +20,8 @@ export const NotificationToast: React.FC = () => {
         return <Truck className="w-5 h-5 text-teal-400" />;
       case "order_delivered":
         return <Sparkles className="w-5 h-5 text-amber-300" />;
+      case "order_rejected":
+        return <XCircle className="w-5 h-5 text-rose-400" />;
       default:
         return <Bell className="w-5 h-5 text-emerald-400" />;
     }

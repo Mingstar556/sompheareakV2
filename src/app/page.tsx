@@ -15,6 +15,10 @@ import { ProductQuickViewModal } from "@/components/ProductQuickViewModal";
 import { ThreeToyViewer } from "@/components/ThreeToyViewer";
 import { NotificationToast } from "@/components/NotificationToast";
 import { AdminLiveStorefrontBar } from "@/components/admin/AdminLiveStorefrontBar";
+import { CustomerBar } from "@/components/CustomerBar";
+import { CustomerAccountModal } from "@/components/CustomerAccountModal";
+import { OrderHistoryModal } from "@/components/OrderHistoryModal";
+import { OrderReceiptModal } from "@/components/OrderReceiptModal";
 import { useStore } from "@/context/StoreContext";
 import { Sparkles, Trophy, Gift, ArrowRight, ShieldCheck, Heart } from "lucide-react";
 import { sounds } from "@/utils/audio";
@@ -36,7 +40,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white relative transition-colors duration-200">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white relative transition-colors duration-200 pb-24 md:pb-28">
       {/* 1. Top Announcement Bar */}
       <AnnouncementBar />
 
@@ -121,6 +125,14 @@ export default function HomePage() {
 
       {/* Admin Live Storefront Direct Edit Bar (Zero footprint for non-admins) */}
       <AdminLiveStorefrontBar />
+
+      {/* Customer Account & Order History Modals */}
+      <CustomerAccountModal />
+      <OrderHistoryModal />
+      <OrderReceiptModal />
+
+      {/* Floating Bottom Customer Bar (Home, History, Center Refresh Logo, Account, Cart) */}
+      <CustomerBar />
     </main>
   );
 }

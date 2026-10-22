@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
@@ -9,7 +9,12 @@ import { Footer } from "@/components/Footer";
 import { ConnectedCharmLink } from "@/components/ConnectedCharmLink";
 import { NotificationToast } from "@/components/NotificationToast";
 import { AdminLiveStorefrontBar } from "@/components/admin/AdminLiveStorefrontBar";
+import { CustomerBar } from "@/components/CustomerBar";
+import { CustomerAccountModal } from "@/components/CustomerAccountModal";
+import { OrderHistoryModal } from "@/components/OrderHistoryModal";
+import { OrderReceiptModal } from "@/components/OrderReceiptModal";
 import { useStore } from "@/context/StoreContext";
+import { CustomerOrder } from "@/types/store";
 import { sounds } from "@/utils/audio";
 import { formatPrice } from "@/utils/currency";
 import {
@@ -34,6 +39,7 @@ import {
   Phone,
   User,
   MessageCircle,
+  Receipt,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -52,6 +58,8 @@ export default function CartPage() {
     saveOrder,
     language,
     t,
+    customerUser,
+    setSelectedReceiptOrder,
   } = useStore();
 
   const [voucherInput, setVoucherInput] = useState("");
@@ -66,11 +74,26 @@ export default function CartPage() {
     paymentMethod: "cod",
   });
 
+  // Auto-fill checkout fields if customer is logged in
+  useEffect(() => {
+    if (customerUser) {
+      setForm((prev) => ({
+        ...prev,
+        fullName: prev.fullName || customerUser.name,
+        phone: prev.phone || customerUser.phone,
+        telegramHandle: prev.telegramHandle || customerUser.telegramHandle || "",
+        address: prev.address || customerUser.address || "",
+        province: prev.province || customerUser.province || "Phnom Penh",
+      }));
+    }
+  }, [customerUser]);
+
   const [submittedOrder, setSubmittedOrder] = useState<{
     orderRef: string;
     telegramUrl: string;
     totalUsd: number;
     points: number;
+    order: CustomerOrder;
   } | null>(null);
 
   // Subtotal calculation across all multiple items
@@ -171,8 +194,8 @@ export default function CartPage() {
 
     addPoints(totalPoints);
 
-    // Save order for owner admin panel management
-    saveOrder({
+    // Construct and save order for owner admin panel management
+    const newOrder: CustomerOrder = {
       id: `ord-${Date.now()}`,
       orderRef,
       customerName: form.fullName,
@@ -191,19 +214,22 @@ export default function CartPage() {
       voucherCodeApplied: activeVoucher?.code || null,
       status: "pending",
       createdAt: new Date().toISOString(),
-    });
+    };
+
+    saveOrder(newOrder);
 
     setSubmittedOrder({
       orderRef,
       telegramUrl: shareUrl,
       totalUsd,
       points: totalPoints,
+      order: newOrder,
     });
     clearCart();
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white flex flex-col justify-between transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-white selection:bg-emerald-600 selection:text-white flex flex-col justify-between transition-colors duration-200 pb-24 md:pb-28">
       <div>
         <AnnouncementBar />
         <Navbar />
@@ -662,6 +688,19 @@ export default function CartPage() {
                 <span>{t("forwardTelegram")}</span>
               </a>
 
+              {/* View / Print Instant Receipt Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playPop();
+                  setSelectedReceiptOrder(submittedOrder.order);
+                }}
+                className="w-full mt-3 py-3.5 px-6 rounded-2xl font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/80 dark:hover:bg-emerald-900/80 border border-emerald-400 font-fredoka text-sm tracking-wide flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+              >
+                <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>View / Print Official Receipt 🧾</span>
+              </button>
+
               <Link
                 href="/#toy-catalog"
                 onClick={() => sounds.playPop()}
@@ -677,6 +716,14 @@ export default function CartPage() {
       <Footer />
       <NotificationToast />
       <AdminLiveStorefrontBar />
+
+      {/* Customer Modals & Navigation Bar */}
+      <CustomerAccountModal />
+      <OrderHistoryModal />
+      <OrderReceiptModal />
+
+      {/* Floating Bottom Customer Bar */}
+      <CustomerBar />
     </div>
   );
 }

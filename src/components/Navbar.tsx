@@ -15,6 +15,9 @@ import {
   Menu,
   X,
   Languages,
+  Receipt,
+  User,
+  RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +36,10 @@ export const Navbar: React.FC = () => {
     setCartDrawerOpen,
     setRewardsModalOpen,
     userPoints,
+    customerUser,
+    isCustomerLoggedIn,
+    setAccountModalOpen,
+    setOrderHistoryModalOpen,
     t,
   } = useStore();
 
@@ -48,13 +55,18 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
-        {/* Brand Logo */}
+        {/* Brand Logo - Click to Refresh */}
         <a
           href="#"
-          onClick={() => sounds.playPop()}
-          className="flex items-center gap-3 group select-none flex-shrink-0"
+          onClick={(e) => {
+            e.preventDefault();
+            sounds.playFanfare();
+            window.location.reload();
+          }}
+          title="Click Logo to Refresh Storefront"
+          className="flex items-center gap-3 group select-none flex-shrink-0 cursor-pointer"
         >
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-toy-green-glow group-hover:scale-105 transition-transform duration-300">
+          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-toy-green-glow group-hover:scale-105 active:scale-95 transition-transform duration-300">
             <div className="w-full h-full rounded-2xl overflow-hidden relative bg-slate-900">
               <Image
                 src="/assets/logo.jpg"
@@ -159,6 +171,37 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
+          {/* Order History & Receipts Button */}
+          <button
+            onClick={() => {
+              sounds.playPop();
+              setOrderHistoryModalOpen(true);
+            }}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all shadow-sm font-fredoka"
+            title="Check Order History & Receipts"
+          >
+            <Receipt className="w-3.5 h-3.5 text-emerald-500" />
+            <span>History</span>
+          </button>
+
+          {/* Customer Account Button */}
+          <button
+            onClick={() => {
+              sounds.playPop();
+              setAccountModalOpen(true);
+            }}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all shadow-sm font-fredoka"
+            title="Customer Account & Rewards"
+          >
+            <div className="relative">
+              <User className="w-3.5 h-3.5 text-emerald-500" />
+              {isCustomerLoggedIn && (
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              )}
+            </div>
+            <span>{isCustomerLoggedIn && customerUser ? customerUser.name.split(" ")[0] : "Account"}</span>
+          </button>
+
           {/* Cart Button with Bouncy Badge */}
           <button
             onClick={() => {
@@ -215,6 +258,31 @@ export const Navbar: React.FC = () => {
                 <span>{link.label}</span>
               </a>
             ))}
+
+            <button
+              onClick={() => {
+                sounds.playPop();
+                setOrderHistoryModalOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-black text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 font-fredoka flex items-center gap-2"
+            >
+              <Receipt className="w-4 h-4 text-emerald-500" />
+              <span>Order History & Receipts</span>
+            </button>
+
+            <button
+              onClick={() => {
+                sounds.playPop();
+                setAccountModalOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-black text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 font-fredoka flex items-center gap-2"
+            >
+              <User className="w-4 h-4 text-emerald-500" />
+              <span>{isCustomerLoggedIn && customerUser ? `My Profile (${customerUser.name})` : "Customer Sign In"}</span>
+            </button>
+
             <div className="pt-2 border-t border-slate-200 dark:border-slate-850 flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">VIP Points:</span>
               <button

@@ -259,6 +259,10 @@ export function updateOrderStatus(orderId: string, status: OrderStatus): Custome
     notifTitle = `Order Delivered: #${order.orderRef}`;
     notifMessage = `Order #${order.orderRef} delivered successfully! +${order.pointsEarned} VIP points active.`;
     notifType = "order_delivered";
+  } else if (status === "rejected" || status === "cancelled") {
+    notifTitle = `Order Rejected: #${order.orderRef}`;
+    notifMessage = `Order #${order.orderRef} was marked as rejected. Customer will be notified via Telegram.`;
+    notifType = "order_rejected";
   }
 
   const notification: OrderNotification = {

@@ -42,7 +42,11 @@ import {
   Bell,
   Database,
   Volume2,
+  Send,
+  XCircle,
+  Receipt,
 } from "lucide-react";
+import { OrderReceiptModal } from "@/components/OrderReceiptModal";
 
 const ADMIN_PASSWORD = "Sompheareakshop1234";
 
@@ -78,6 +82,7 @@ export default function AdminPage() {
     currency,
     themeMode,
     toggleTheme,
+    setSelectedReceiptOrder,
   } = useStore();
 
   // Authentication State
@@ -868,7 +873,7 @@ export default function AdminPage() {
               </div>
 
               <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 scrollbar-none">
-                {["all", "pending", "confirmed", "packaging", "shipped", "delivered", "cancelled"].map((st) => (
+                {["all", "pending", "confirmed", "packaging", "shipped", "delivered", "rejected"].map((st) => (
                   <button
                     key={st}
                     onClick={() => {
@@ -907,17 +912,27 @@ export default function AdminPage() {
                     packaging: "bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-700/50",
                     shipped: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700/50",
                     delivered: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/50",
+                    rejected: "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-700/50",
                     cancelled: "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-700/50",
                   };
+
+                  // Telegram redirect link generator
+                  const tlgUsername = ord.telegramHandle ? ord.telegramHandle.replace("@", "").trim() : "";
+                  const cleanPhone = ord.customerPhone ? ord.customerPhone.replace(/[^0-9]/g, "") : "";
+                  const tlgUrl = tlgUsername
+                    ? `https://t.me/${tlgUsername}`
+                    : cleanPhone
+                    ? `https://t.me/+${cleanPhone.startsWith("855") ? cleanPhone : "855" + cleanPhone.replace(/^0/, "")}`
+                    : null;
 
                   return (
                     <div
                       key={ord.id}
                       className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4"
                     >
-                      {/* Top Bar: Order Ref, Status Dropdown, Time */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3">
+                      {/* Top Bar: Order Ref, Time, Telegram Direct Chat, Status Actions, Receipt, Delete */}
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex flex-wrap items-center gap-2.5">
                           <span className="font-mono text-sm font-black text-emerald-700 dark:text-toy-cyan bg-emerald-50 dark:bg-slate-950 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-slate-800">
                             {ord.orderRef}
                           </span>
@@ -925,31 +940,138 @@ export default function AdminPage() {
                             {new Date(ord.createdAt).toLocaleDateString()} at{" "}
                             {new Date(ord.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
+                          {/* Current Status Badge */}
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-black uppercase tracking-wider border ${statusColors[ord.status] || "bg-slate-100 text-slate-700"}`}>
+                            {ord.status}
+                          </span>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          {/* Live Status Selector */}
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-slate-500">Status:</span>
-                            <select
-                              value={ord.status}
-                              onChange={(e) => {
-                                sounds.playChime();
-                                updateOrderStatus(ord.id, e.target.value as OrderStatus);
-                                showToast(`Order ${ord.orderRef} set to ${e.target.value.toUpperCase()}`);
-                              }}
-                              className={`px-3 py-1 rounded-xl text-xs font-black capitalize border outline-none cursor-pointer ${
-                                statusColors[ord.status] || "bg-slate-200 text-slate-800"
-                              }`}
+                        {/* Action Buttons: 1-Click Telegram Chat, Confirm / Reject Action Buttons, Receipt, Delete */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* 1-Click Telegram Redirect Button */}
+                          {tlgUrl && (
+                            <a
+                              href={tlgUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => sounds.playPop()}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] hover:bg-[#1e8ec3] text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                              title="Directly message customer on Telegram"
                             >
-                              <option value="pending">Pending</option>
-                              <option value="confirmed">Confirmed</option>
-                              <option value="packaging">Packaging</option>
-                              <option value="shipped">Shipped</option>
-                              <option value="delivered">Delivered</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                          </div>
+                              <Send className="w-3.5 h-3.5" />
+                              <span>Telegram</span>
+                            </a>
+                          )}
+
+                          {/* Direct Confirm or Reject Buttons for Pending */}
+                          {ord.status === "pending" && (
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  sounds.playChime();
+                                  updateOrderStatus(ord.id, "confirmed");
+                                  showToast(`Order ${ord.orderRef} CONFIRMED! Notification sent.`);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>✓ Confirm</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (confirm(`Reject order ${ord.orderRef}? Customer will see rejected status.`)) {
+                                    sounds.playPop();
+                                    updateOrderStatus(ord.id, "rejected");
+                                    showToast(`Order ${ord.orderRef} REJECTED.`);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                <span>✕ Reject</span>
+                              </button>
+                            </div>
+                          )}
+
+                          {ord.status === "confirmed" && (
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  sounds.playPop();
+                                  updateOrderStatus(ord.id, "packaging");
+                                  showToast(`Order ${ord.orderRef} moved to PACKAGING.`);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                              >
+                                <Package className="w-3.5 h-3.5" />
+                                <span>Pack</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  updateOrderStatus(ord.id, "rejected");
+                                  showToast(`Order ${ord.orderRef} marked as Rejected.`);
+                                }}
+                                className="px-2 py-1 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg text-xs font-bold"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+
+                          {ord.status === "packaging" && (
+                            <button
+                              onClick={() => {
+                                sounds.playChime();
+                                updateOrderStatus(ord.id, "shipped");
+                                showToast(`Order ${ord.orderRef} moved to SHIPPED 🚚.`);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                            >
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Ship</span>
+                            </button>
+                          )}
+
+                          {ord.status === "shipped" && (
+                            <button
+                              onClick={() => {
+                                sounds.playFanfare();
+                                updateOrderStatus(ord.id, "delivered");
+                                showToast(`Order ${ord.orderRef} marked as DELIVERED 🎉!`);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Deliver</span>
+                            </button>
+                          )}
+
+                          {(ord.status === "rejected" || ord.status === "cancelled") && (
+                            <button
+                              onClick={() => {
+                                sounds.playChime();
+                                updateOrderStatus(ord.id, "confirmed");
+                                showToast(`Order ${ord.orderRef} re-opened and Confirmed.`);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm transition-all active:scale-95"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Re-Confirm</span>
+                            </button>
+                          )}
+
+                          {/* View / Print Receipt Button */}
+                          <button
+                            onClick={() => {
+                              sounds.playPop();
+                              setSelectedReceiptOrder(ord);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors"
+                            title="View Printable Receipt"
+                          >
+                            <Receipt className="w-3.5 h-3.5 text-emerald-600 dark:text-toy-cyan" />
+                            <span className="hidden sm:inline">Receipt</span>
+                          </button>
 
                           {/* Delete Order */}
                           <button
@@ -1617,6 +1739,9 @@ export default function AdminPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Printable / Beautiful Order Receipt Modal */}
+      <OrderReceiptModal />
     </div>
   );
 }

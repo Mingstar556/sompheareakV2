@@ -95,7 +95,18 @@ export interface UserProfile {
   savedVouchers: string[];
 }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'packaging' | 'shipped' | 'delivered' | 'cancelled';
+export interface CustomerAccount {
+  id: string;
+  name: string;
+  phone: string;
+  telegramHandle: string;
+  province?: string;
+  address?: string;
+  rememberMe?: boolean;
+  createdAt: string;
+}
+
+export type OrderStatus = 'pending' | 'confirmed' | 'packaging' | 'shipped' | 'delivered' | 'cancelled' | 'rejected';
 
 export interface CustomerOrder {
   id: string;
@@ -124,7 +135,7 @@ export interface OrderNotification {
   orderRef: string;
   title: string;
   message: string;
-  type: 'order_placed' | 'order_confirmed' | 'order_shipped' | 'order_delivered' | 'system';
+  type: 'order_placed' | 'order_confirmed' | 'order_shipped' | 'order_delivered' | 'order_rejected' | 'system';
   read: boolean;
   createdAt: string;
 }
