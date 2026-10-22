@@ -64,7 +64,7 @@ export const ProductGrid: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 focus:border-toy-purple text-sm text-white placeholder-slate-500 outline-none transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 focus:border-emerald-500 text-sm text-white placeholder-slate-500 outline-none transition-all"
           />
           {searchQuery && (
             <button

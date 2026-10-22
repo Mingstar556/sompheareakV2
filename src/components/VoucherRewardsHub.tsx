@@ -49,7 +49,7 @@ export const VoucherRewardsHub: React.FC = () => {
           </p>
 
           {/* Live Points Counter Pill */}
-          <div className="mt-6 inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/90 border-2 border-toy-yellow shadow-toy-glow">
+          <div className="mt-6 inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/90 border-2 border-emerald-500 shadow-toy-green-glow">
             <Trophy className="w-6 h-6 text-toy-yellow fill-toy-yellow" />
             <div className="text-left">
               <span className="text-[11px] font-bold text-slate-400 block leading-tight">
@@ -57,7 +57,7 @@ export const VoucherRewardsHub: React.FC = () => {
               </span>
               <span className="text-2xl font-black text-toy-yellow font-fredoka">
                 {userPoints}{" "}
-                <span className="text-sm text-toy-cyan font-bold">{t("pointsTag")}</span>
+                <span className="text-sm text-emerald-400 font-bold">{t("pointsTag")}</span>
               </span>
             </div>
           </div>
@@ -123,14 +123,14 @@ export const VoucherRewardsHub: React.FC = () => {
                 {/* Bottom Action Button */}
                 <div className="mt-4 pt-3 border-t border-slate-800">
                   {isActive ? (
-                    <div className="py-2.5 px-4 rounded-xl bg-toy-green/20 border border-toy-green/40 text-toy-green font-black text-xs text-center flex items-center justify-center gap-1.5 font-fredoka">
+                    <div className="py-2.5 px-4 rounded-xl bg-emerald-950/70 border border-emerald-500/50 text-emerald-400 font-black text-xs text-center flex items-center justify-center gap-1.5 font-fredoka">
                       <Check className="w-4 h-4" />
                       <span>{t("claimed")}</span>
                     </div>
                   ) : isClaimed ? (
                     <button
                       onClick={() => applyVoucherCode(voucher.code)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-toy-purple text-white font-black text-xs font-fredoka hover:opacity-90 transition-all flex items-center justify-center gap-1.5 shadow-md"
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white font-black text-xs font-fredoka transition-all flex items-center justify-center gap-1.5 shadow-toy-green-glow"
                     >
                       <span>{t("applyNow")}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -138,7 +138,7 @@ export const VoucherRewardsHub: React.FC = () => {
                   ) : canAfford ? (
                     <button
                       onClick={() => handleExchange(voucher)}
-                      className="w-full py-2.5 px-4 rounded-xl font-black text-slate-950 bg-gradient-to-r from-toy-yellow to-amber-400 hover:from-amber-300 hover:to-toy-yellow font-fredoka text-xs transition-all shadow-toy-glow flex items-center justify-center gap-1.5 active:scale-95"
+                      className="w-full py-2.5 px-4 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-700 hover:from-emerald-400 hover:to-green-500 font-fredoka text-xs transition-all shadow-toy-green-glow border-b-2 border-emerald-900 flex items-center justify-center gap-1.5 active:scale-95"
                     >
                       <Coins className="w-4 h-4" />
                       <span>{t("exchangeBtn")} ({voucher.pointsCost} pt)</span>

@@ -27,6 +27,12 @@ html:not(.dark) body {
   color: #0f172a;
 }
 
+/* Custom Selection */
+::selection {
+  background: #059669;
+  color: #ffffff;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -43,7 +49,7 @@ html:not(.dark) body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
+  background: #10b981;
 }
 
 /* Hide scrollbar utility */

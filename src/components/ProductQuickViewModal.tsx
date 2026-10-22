@@ -44,7 +44,7 @@ export const ProductQuickViewModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-2xl bg-slate-900 border-2 border-toy-purple/50 rounded-3xl p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto flex flex-col md:flex-row gap-6"
+          className="relative w-full max-w-2xl bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto flex flex-col md:flex-row gap-6"
         >
           {/* Close button */}
           <button
@@ -101,7 +101,7 @@ export const ProductQuickViewModal: React.FC = () => {
                     {formatPrice(product.price, currency)}
                   </span>
                 )}
-                <span className="ml-auto text-xs font-bold text-toy-green bg-toy-green/10 px-2 py-0.5 rounded-full border border-toy-green/30">
+                <span className="ml-auto text-xs font-bold text-emerald-400 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-700/40">
                   +{product.pt} Points
                 </span>
               </div>
@@ -152,7 +152,7 @@ export const ProductQuickViewModal: React.FC = () => {
                     handleClose();
                     setViewer3DProduct(product);
                   }}
-                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-toy-cyan font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-emerald-500 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                   title="View in 3D"
                 >
                   <Box className="w-4 h-4" />
@@ -160,7 +160,7 @@ export const ProductQuickViewModal: React.FC = () => {
                 </button>
                 <button
                   onClick={handleAdd}
-                  className="flex-1 py-3 px-5 rounded-xl font-black text-white bg-gradient-to-r from-toy-pink to-toy-purple shadow-toy-glow font-fredoka text-sm flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+                  className="flex-1 py-3 px-5 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-sm flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>{t("addToCart")}</span>

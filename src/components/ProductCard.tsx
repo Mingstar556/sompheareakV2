@@ -32,7 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="group relative bg-slate-900/90 dark:bg-slate-900/90 light:bg-white border-2 border-slate-800 hover:border-toy-purple/60 rounded-3xl p-4 shadow-toy-card transition-all flex flex-col justify-between overflow-hidden"
+      className="group relative bg-slate-900/90 dark:bg-slate-900/90 light:bg-white border-2 border-slate-800 hover:border-emerald-500/50 rounded-3xl p-4 shadow-toy-card transition-all flex flex-col justify-between overflow-hidden"
     >
       {/* Top Badges */}
       <div className="absolute top-6 left-6 z-10 flex flex-col gap-1.5 pointer-events-none">
@@ -59,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           sounds.playPop();
           setViewer3DProduct(product);
         }}
-        className="absolute top-6 right-6 z-10 w-9 h-9 rounded-2xl bg-black/60 hover:bg-toy-cyan text-white hover:text-slate-950 backdrop-blur-md flex items-center justify-center border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-md"
+        className="absolute top-6 right-6 z-10 w-9 h-9 rounded-2xl bg-black/60 hover:bg-emerald-500 text-white hover:text-slate-950 backdrop-blur-md flex items-center justify-center border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-md"
         title="Interactive 3D Spin"
       >
         <Box className="w-4 h-4 animate-pulse" />
@@ -99,7 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span>{product.rating || 4.9}</span>
               <span className="text-slate-500 text-[10px]">({product.reviewsCount || 42})</span>
             </div>
-            <span className="text-[11px] font-bold text-toy-green bg-toy-green/10 px-2 py-0.5 rounded-full border border-toy-green/20">
+            <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/70 px-2 py-0.5 rounded-full border border-emerald-700/40">
               +{product.pt} VIP pt
             </span>
           </div>
@@ -109,7 +109,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               sounds.playPop();
               setQuickViewProduct(product);
             }}
-            className="text-base font-black text-white hover:text-toy-cyan transition-colors font-fredoka line-clamp-1 cursor-pointer"
+            className="text-base font-black text-white hover:text-emerald-400 transition-colors font-fredoka line-clamp-1 cursor-pointer"
           >
             {language === "km" ? product.nameKh : product.name}
           </h3>
@@ -137,14 +137,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 sounds.playPop();
                 setViewer3DProduct(product);
               }}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-toy-cyan border border-slate-700 hover:border-toy-cyan transition-all"
+              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 hover:border-emerald-500 transition-all"
               title="3D Inspection"
             >
               <Box className="w-4 h-4" />
             </button>
             <button
               onClick={() => addToCart(product, 1)}
-              className="py-2.5 px-3.5 rounded-xl font-black text-white bg-gradient-to-r from-toy-pink to-toy-purple hover:opacity-95 active:scale-95 transition-all shadow-md flex items-center gap-1.5 font-fredoka text-xs"
+              className="py-2.5 px-3.5 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-700 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all shadow-toy-green-glow border-b-2 border-emerald-900 flex items-center gap-1.5 font-fredoka text-xs"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>{t("addToCart")}</span>

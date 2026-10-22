@@ -134,7 +134,7 @@ export const CheckoutModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-lg bg-slate-900 border-2 border-toy-purple/50 rounded-3xl p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto"
+          className="relative w-full max-w-lg bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto"
         >
           {/* Close Button */}
           <button
@@ -264,7 +264,7 @@ export const CheckoutModal: React.FC = () => {
                       }}
                       className={`p-3 rounded-2xl border text-left text-xs font-bold transition-all ${
                         form.paymentMethod === "khqr"
-                          ? "bg-toy-cyan/20 border-toy-cyan text-white shadow-md"
+                          ? "bg-emerald-950/60 border-emerald-500 text-white shadow-toy-green-glow"
                           : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-850"
                       }`}
                     >
@@ -284,7 +284,7 @@ export const CheckoutModal: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+                    className="w-full py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
                   >
                     <Send className="w-5 h-5" />
                     <span>{t("confirmOrder")}</span>

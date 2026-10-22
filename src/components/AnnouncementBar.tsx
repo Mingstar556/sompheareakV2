@@ -8,7 +8,7 @@ export const AnnouncementBar: React.FC = () => {
   const { t } = useStore();
 
   return (
-    <div className="bg-gradient-to-r from-toy-purple via-toy-pink to-toy-orange text-white py-1.5 px-4 text-xs font-bold overflow-hidden select-none border-b border-white/10 shadow-sm">
+    <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white py-1.5 px-4 text-xs font-bold overflow-hidden select-none border-b border-emerald-500/20 shadow-sm">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
           <Sparkles className="w-3.5 h-3.5 text-toy-yellow animate-pulse flex-shrink-0" />

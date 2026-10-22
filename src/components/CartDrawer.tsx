@@ -88,9 +88,9 @@ export const CartDrawer: React.FC = () => {
               {/* Drawer Header */}
               <div className="p-5 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-toy-pink" />
+                  <ShoppingBag className="w-5 h-5 text-emerald-400" />
                   <h2 className="text-xl font-black font-fredoka">{t("cartTitle")}</h2>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-toy-purple text-white">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
                     {cart.reduce((s, i) => s + i.quantity, 0)}
                   </span>
                 </div>
@@ -113,13 +113,13 @@ export const CartDrawer: React.FC = () => {
                       ? t("freeDeliveryEligible")
                       : t("freeDeliveryAway", { amount: formatPrice(remainingForFreeShipping, currency) })}
                   </span>
-                  <span className="text-toy-green">{Math.round(freeShippingProgress)}%</span>
+                  <span className="text-emerald-400">{Math.round(freeShippingProgress)}%</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${freeShippingProgress}%` }}
-                    className="h-full rounded-full bg-gradient-to-r from-toy-cyan to-toy-green"
+                    className="h-full rounded-full bg-gradient-to-r from-teal-400 via-emerald-500 to-green-600"
                   />
                 </div>
               </div>
@@ -138,7 +138,7 @@ export const CartDrawer: React.FC = () => {
                         sounds.playPop();
                         setCartDrawerOpen(false);
                       }}
-                      className="mt-5 px-6 py-2.5 rounded-2xl bg-toy-purple text-white font-black text-xs shadow-md font-fredoka hover:opacity-90"
+                      className="mt-5 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-toy-green-glow font-fredoka hover:opacity-90"
                     >
                       {t("startShopping")}
                     </button>
@@ -249,7 +249,7 @@ export const CartDrawer: React.FC = () => {
                         />
                         <button
                           type="submit"
-                          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-black text-toy-yellow font-fredoka"
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-xs font-black text-white font-fredoka shadow-sm transition-all"
                         >
                           {t("applyVoucher")}
                         </button>
@@ -265,7 +265,7 @@ export const CartDrawer: React.FC = () => {
                       <span className="font-bold">{formatPrice(subtotalUsd, currency)}</span>
                     </div>
                     {discountUsd > 0 && (
-                      <div className="flex justify-between text-toy-green font-bold">
+                      <div className="flex justify-between text-emerald-400 font-bold">
                         <span>Voucher Discount:</span>
                         <span>-{formatPrice(discountUsd, currency)}</span>
                       </div>
@@ -292,7 +292,7 @@ export const CartDrawer: React.FC = () => {
                         setCartDrawerOpen(false);
                         setCheckoutModalOpen(true);
                       }}
-                      className="w-full py-3.5 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+                      className="w-full py-3.5 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
                     >
                       <span>{t("checkoutBtn")}</span>
                       <ArrowRight className="w-5 h-5" />
@@ -304,7 +304,7 @@ export const CartDrawer: React.FC = () => {
                         sounds.playPop();
                         setCartDrawerOpen(false);
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 hover:text-white border border-emerald-600/50 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
                       <span>Open Full Cart Page (Multi-Item Checkout)</span>
                       <span>→</span>

@@ -143,7 +143,7 @@ export const ConnectedCharmLink: React.FC<ConnectedCharmLinkProps> = ({
 
         {/* Selection / Hover Indicator */}
         {isSelected && (
-          <div className="absolute inset-0 border-2 border-toy-yellow rounded-[4px] pointer-events-none shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+          <div className="absolute inset-0 border-2 border-emerald-400 rounded-[4px] pointer-events-none shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
         )}
       </div>
 

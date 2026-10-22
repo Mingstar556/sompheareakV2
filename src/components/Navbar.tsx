@@ -54,7 +54,7 @@ export const Navbar: React.FC = () => {
           onClick={() => sounds.playPop()}
           className="flex items-center gap-3 group select-none flex-shrink-0"
         >
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-toy-purple to-toy-pink p-0.5 shadow-toy-glow group-hover:scale-105 transition-transform duration-300">
+          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-toy-green-glow group-hover:scale-105 transition-transform duration-300">
             <div className="w-full h-full rounded-2xl overflow-hidden relative bg-slate-900">
               <Image
                 src="/assets/logo.jpg"
@@ -70,10 +70,10 @@ export const Navbar: React.FC = () => {
 
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-fredoka tracking-tight text-white group-hover:text-toy-cyan transition-colors">
+              <span className="text-xl sm:text-2xl font-black font-fredoka tracking-tight text-white group-hover:text-emerald-400 transition-colors">
                 SOMPHEA REAK
               </span>
-              <span className="px-2 py-0.5 rounded-lg bg-toy-pink text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+              <span className="px-2 py-0.5 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
                 V2
               </span>
             </div>
@@ -165,7 +165,7 @@ export const Navbar: React.FC = () => {
               sounds.playPop();
               setCartDrawerOpen(true);
             }}
-            className="relative px-3.5 py-2 rounded-2xl bg-gradient-to-r from-toy-pink to-toy-purple hover:opacity-95 text-white font-black text-xs font-fredoka flex items-center gap-2 shadow-toy-glow transition-all hover:scale-105 active:scale-95 select-none"
+            className="relative px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-700 hover:from-emerald-400 hover:to-green-500 text-white font-black text-xs font-fredoka flex items-center gap-2 shadow-toy-green-glow border border-emerald-400/30 transition-all hover:scale-105 active:scale-95 select-none"
             title="Open Cart"
           >
             <ShoppingBag className="w-4 h-4" />

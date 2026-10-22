@@ -9,14 +9,14 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative bg-slate-950 border-t border-slate-800 text-white pt-16 pb-12 overflow-hidden">
       {/* Background soft glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-toy-purple/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-slate-850">
           {/* Brand Col */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-tr from-toy-purple to-toy-pink p-0.5">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5">
                 <Image
                   src="/assets/logo.jpg"
                   alt="Somphea Reak Logo"
@@ -26,16 +26,16 @@ export const Footer: React.FC = () => {
               </div>
               <div>
                 <span className="text-xl font-black font-fredoka text-white">SOMPHEA REAK</span>
-                <span className="ml-1.5 px-1.5 py-0.5 rounded bg-toy-pink text-white text-[9px] font-black uppercase">
+                <span className="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[9px] font-black uppercase">
                   V2
                 </span>
                 <p className="text-[10px] text-slate-400 font-bold">សម្ភារៈ • Toy Universe</p>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Cambodia&apos;s premier destination for viral collectible toys, mystery blind boxes, and authentic custom Italian modular charm bracelets.
+              Cambodia&apos;s premier destination for viral collectible toys, points-to-vouchers loyalty rewards, and authentic custom Italian modular charm bracelets.
             </p>
-            <div className="flex items-center gap-2 text-xs font-bold text-toy-green">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
               <ShieldCheck className="w-4 h-4" />
               <span>Verified Telegram Storefront</span>
             </div>
@@ -49,13 +49,13 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <a href="#toy-catalog" className="hover:text-toy-cyan transition-colors">
+                <a href="#toy-catalog" className="hover:text-emerald-400 transition-colors">
                   Minifigure Heroes & Villains
                 </a>
               </li>
               <li>
-                <a href="#mystery-box" className="hover:text-toy-pink transition-colors">
-                  Mystery Blind Box Drops
+                <a href="#voucher-hub" className="hover:text-emerald-400 transition-colors">
+                  Loyalty Points & Voucher Hub 🎟️
                 </a>
               </li>
               <li>

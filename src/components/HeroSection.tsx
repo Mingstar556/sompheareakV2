@@ -30,7 +30,7 @@ export const HeroSection: React.FC = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-toy-pink/20 via-toy-purple/20 to-toy-cyan/20 border border-toy-pink/40 shadow-toy-glow text-white text-xs font-black tracking-wider uppercase font-fredoka"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/20 via-toy-purple/20 to-teal-500/20 border border-emerald-500/40 shadow-toy-green-glow text-white text-xs font-black tracking-wider uppercase font-fredoka"
           >
             <Sparkles className="w-4 h-4 text-toy-yellow animate-spin" style={{ animationDuration: "6s" }} />
             <span>{t("heroBadge")}</span>
@@ -55,7 +55,7 @@ export const HeroSection: React.FC = () => {
             <a
               href="#toy-catalog"
               onClick={() => sounds.playBounce()}
-              className="px-7 py-4 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all select-none border-2 border-white/20"
+              className="px-7 py-4 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-teal-700 shadow-toy-green-glow font-fredoka text-base tracking-wide flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all select-none border-2 border-emerald-300/30"
             >
               <span>{t("heroCtaShop")}</span>
               <ArrowRight className="w-5 h-5" />
@@ -80,7 +80,7 @@ export const HeroSection: React.FC = () => {
             <a
               href="/cart"
               onClick={() => sounds.playBounce()}
-              className="px-5 py-4 rounded-2xl font-bold text-toy-cyan bg-toy-cyan/10 hover:bg-toy-cyan/20 border border-toy-cyan/30 font-fredoka text-sm flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+              className="px-5 py-4 rounded-2xl font-bold text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-600/50 shadow-md font-fredoka text-sm flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
             >
               <span>View Cart & Checkout 🛒</span>
             </a>
@@ -117,7 +117,7 @@ export const HeroSection: React.FC = () => {
           className="lg:col-span-6 xl:col-span-5 relative flex items-center justify-center"
         >
           {/* Glassmorphic 3D Card Backdrop */}
-          <div className="w-full relative rounded-3xl bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-indigo-950/40 border-2 border-toy-purple/40 shadow-2xl p-2 overflow-hidden backdrop-blur-md">
+          <div className="w-full relative rounded-3xl bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-emerald-950/40 border-2 border-emerald-500/40 shadow-2xl p-2 overflow-hidden backdrop-blur-md">
             {/* Top Interactive Indicator */}
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-bold text-slate-300">
               <span className="w-2 h-2 rounded-full bg-toy-green animate-ping" />

@@ -34,7 +34,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#0b0f19] dark:bg-[#0b0f19] light:bg-[#f8fafc] text-white selection:bg-toy-pink selection:text-white relative">
+    <main className="min-h-screen bg-[#0b0f19] dark:bg-[#0b0f19] light:bg-[#f8fafc] text-white selection:bg-emerald-600 selection:text-white relative">
       {/* 1. Top Announcement Bar */}
       <AnnouncementBar />
 
@@ -45,7 +45,7 @@ export default function HomePage() {
       <HeroSection />
 
       {/* 4. Playful Scrolling Marquee Ticker */}
-      <div className="py-3 bg-gradient-to-r from-toy-purple via-toy-pink to-toy-cyan overflow-hidden select-none shadow-md">
+      <div className="py-3 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-800 overflow-hidden select-none shadow-md">
         <div className="flex w-max animate-marquee gap-8 items-center text-xs sm:text-sm font-black font-fredoka tracking-wider uppercase text-white">
           {[...marqueeKeywords, ...marqueeKeywords].map((item, idx) => (
             <span key={idx} className="flex items-center gap-3">
@@ -69,12 +69,12 @@ export default function HomePage() {
 
       {/* 8. VIP Toy Club Rewards Callout Banner */}
       <section className="py-12 px-4 max-w-5xl mx-auto my-8">
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-indigo-900/90 via-purple-900/90 to-pink-900/90 border-2 border-toy-yellow/50 shadow-toy-glow text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-slate-900/95 via-emerald-950/80 to-slate-900/95 border-2 border-emerald-500/50 shadow-toy-green-glow text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
           {/* Background sparkles */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-toy-yellow/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
 
           <div className="space-y-2 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-toy-yellow text-slate-950 font-black text-xs font-fredoka uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-black text-xs font-fredoka uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5" />
               <span>Somphea Reak VIP Club</span>
             </div>
@@ -91,7 +91,7 @@ export default function HomePage() {
               sounds.playFanfare();
               setRewardsModalOpen(true);
             }}
-            className="relative z-10 px-7 py-4 rounded-2xl font-black text-slate-950 bg-gradient-to-r from-toy-yellow to-amber-400 hover:from-amber-300 hover:to-toy-yellow shadow-toy-glow font-fredoka text-sm tracking-wide flex items-center gap-2 transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+            className="relative z-10 px-7 py-4 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-sm tracking-wide flex items-center gap-2 transition-all hover:scale-105 active:scale-95 flex-shrink-0 hover:from-emerald-400 hover:to-green-500"
           >
             <Gift className="w-4 h-4" />
             <span>Open VIP Club ⭐</span>

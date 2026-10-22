@@ -253,12 +253,12 @@ export const CustomBraceletStudio: React.FC = () => {
                   }}
                   className={`p-3 rounded-2xl border text-left transition-all ${
                     packaging === "basic"
-                      ? "bg-toy-purple/20 border-toy-purple text-white shadow-md"
+                      ? "bg-emerald-950/60 border-emerald-500 text-white shadow-toy-green-glow"
                       : "bg-slate-800/50 border-slate-800 text-slate-400 hover:bg-slate-800"
                   }`}
                 >
                   <div className="text-xs font-bold">{t("boxBasic")}</div>
-                  <div className="text-[11px] text-toy-green font-semibold mt-0.5">$0.00 Included</div>
+                  <div className="text-[11px] text-emerald-400 font-semibold mt-0.5">$0.00 Included</div>
                 </button>
                 <button
                   onClick={() => {
@@ -280,11 +280,11 @@ export const CustomBraceletStudio: React.FC = () => {
         </div>
 
         {/* Right Column: Charms Catalog & Instant Snap */}
-        <div className="lg:col-span-5 bg-slate-900 border-2 border-toy-pink/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-slate-900 border-2 border-emerald-500/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-black text-white font-fredoka">Tap to Connect Charms</h3>
-              <span className="text-xs text-toy-pink font-bold">$1.50 - $1.75 / link</span>
+              <span className="text-xs text-emerald-400 font-bold">$1.50 - $1.75 / link</span>
             </div>
 
             {/* Category Filter Pills */}
@@ -298,7 +298,7 @@ export const CustomBraceletStudio: React.FC = () => {
                   }}
                   className={`px-3 py-1 rounded-xl text-xs font-bold capitalize transition-all whitespace-nowrap ${
                     selectedCategory === c
-                      ? "bg-toy-pink text-white shadow-sm"
+                      ? "bg-emerald-600 text-white shadow-toy-green-glow"
                       : "bg-slate-800 text-slate-400 hover:bg-slate-700"
                   }`}
                 >
@@ -362,14 +362,14 @@ export const CustomBraceletStudio: React.FC = () => {
             </div>
 
             <div className="mt-2 text-right">
-              <span className="text-[11px] font-bold text-toy-green">
+              <span className="text-[11px] font-bold text-emerald-400">
                 +{rewardPoints} VIP Points will be earned!
               </span>
             </div>
 
             <button
               onClick={handleAddToCart}
-              className="mt-4 w-full py-3.5 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-toy-green to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+              className="mt-4 w-full py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
             >
               <ShoppingCart className="w-5 h-5" />
               <span>{t("addCustomToCart")}</span>

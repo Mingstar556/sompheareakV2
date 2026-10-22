@@ -92,9 +92,9 @@ export const RewardsModal: React.FC = () => {
           <button
             onClick={handleRedeem}
             disabled={userPoints < 25}
-            className={`w-full py-3.5 px-5 rounded-2xl font-black font-fredoka text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
+            className={`w-full py-4 px-5 rounded-2xl font-black font-fredoka text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
               userPoints >= 25
-                ? "bg-gradient-to-r from-toy-yellow to-toy-orange text-slate-950 shadow-toy-glow hover:opacity-95 active:scale-95 cursor-pointer"
+                ? "bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 text-white shadow-toy-green-glow border-b-4 border-emerald-950 hover:from-emerald-400 hover:to-green-500 active:scale-95 cursor-pointer"
                 : "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
             }`}
           >
@@ -104,12 +104,12 @@ export const RewardsModal: React.FC = () => {
 
           {/* Active Voucher State */}
           {activeVoucher && (
-            <div className="mt-4 p-3 rounded-xl bg-toy-green/10 border border-toy-green/30 text-xs flex items-center justify-between">
-              <div className="flex items-center gap-2 text-toy-green font-bold">
+            <div className="mt-4 p-3 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-xs flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold">
                 <Check className="w-4 h-4" />
                 <span>Active: {activeVoucher.description}</span>
               </div>
-              <span className="text-[10px] bg-toy-green text-slate-950 px-2 py-0.5 rounded font-black">
+              <span className="text-[10px] bg-emerald-500 text-slate-950 px-2 py-0.5 rounded font-black">
                 READY
               </span>
             </div>

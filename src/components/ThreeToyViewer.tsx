@@ -271,7 +271,7 @@ export const ThreeToyViewer: React.FC<ThreeToyViewerProps> = ({ product, onClose
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-4xl bg-slate-900 border-2 border-toy-purple/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh]"
+          className="relative w-full max-w-4xl bg-slate-900 border-2 border-emerald-500/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh]"
         >
           {/* Close button */}
           <button
@@ -395,7 +395,7 @@ export const ThreeToyViewer: React.FC<ThreeToyViewerProps> = ({ product, onClose
                   addToCart(product, 1);
                   onClose();
                 }}
-                className="w-full py-3.5 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink to-toy-purple shadow-toy-glow hover:opacity-95 active:scale-95 transition-all flex items-center justify-center gap-2 font-fredoka text-base"
+                className="w-full py-4 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all flex items-center justify-center gap-2 font-fredoka text-base"
               >
                 <ShoppingCart className="w-5 h-5" />
                 <span>{t("addToCart")}</span>

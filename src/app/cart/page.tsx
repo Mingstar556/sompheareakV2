@@ -223,7 +223,7 @@ export default function CartPage() {
                 <Link
                   href="/#toy-catalog"
                   onClick={() => sounds.playBounce()}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan text-white font-black font-fredoka text-sm shadow-toy-glow hover:scale-105 active:scale-95 transition-all"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-600 to-teal-700 text-white font-black font-fredoka text-sm shadow-toy-green-glow hover:scale-105 active:scale-95 transition-all border border-emerald-300/30"
                 >
                   <span>{t("startShopping")}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -385,10 +385,10 @@ export default function CartPage() {
                 {/* Right Column (5 cols): Checkout Form & Order Summary */}
                 <div className="lg:col-span-5 space-y-5">
                   {/* Order Summary Box */}
-                  <div className="p-6 rounded-3xl bg-slate-900 border-2 border-toy-purple/40 shadow-xl space-y-4">
+                  <div className="p-6 rounded-3xl bg-slate-900 border-2 border-emerald-600/40 shadow-xl space-y-4">
                     <h3 className="text-lg font-black text-white font-fredoka flex items-center justify-between">
                       <span>{t("orderSummary")}</span>
-                      <span className="text-xs text-toy-green font-bold">
+                      <span className="text-xs text-emerald-400 font-bold">
                         +{totalPoints} VIP Points
                       </span>
                     </h3>
@@ -396,8 +396,8 @@ export default function CartPage() {
                     {/* Voucher Input */}
                     <div>
                       {activeVoucher ? (
-                        <div className="flex items-center justify-between p-3 rounded-2xl bg-toy-green/15 border border-toy-green/40 text-xs">
-                          <div className="flex items-center gap-2 text-toy-green font-bold">
+                        <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/40 text-xs">
+                          <div className="flex items-center gap-2 text-emerald-400 font-bold">
                             <Tag className="w-4 h-4" />
                             <span>
                               {language === "km"
@@ -419,11 +419,11 @@ export default function CartPage() {
                             value={voucherInput}
                             onChange={(e) => setVoucherInput(e.target.value)}
                             placeholder="Enter Voucher Code (e.g. TOY15)"
-                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 outline-none uppercase"
+                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-xs text-white placeholder-slate-500 outline-none uppercase"
                           />
                           <button
                             type="submit"
-                            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-black text-toy-yellow font-fredoka"
+                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-xs font-black text-white font-fredoka shadow-sm transition-all"
                           >
                             {t("applyVoucher")}
                           </button>
@@ -586,7 +586,7 @@ export default function CartPage() {
                       {/* Place Multi-Item Order Button */}
                       <button
                         type="submit"
-                        className="w-full mt-3 py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+                        className="w-full mt-3 py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
                       >
                         <Send className="w-5 h-5" />
                         <span>Confirm & Check Out All Items 🧾</span>
