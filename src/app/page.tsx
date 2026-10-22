@@ -5,7 +5,7 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductGrid } from "@/components/ProductGrid";
-import { MysteryBlindBox } from "@/components/MysteryBlindBox";
+import { VoucherRewardsHub } from "@/components/VoucherRewardsHub";
 import { CustomBraceletStudio } from "@/components/CustomBraceletStudio";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -23,11 +23,12 @@ export default function HomePage() {
 
   const marqueeKeywords = [
     "🔥 HOT DROP MINIFIGURES",
-    "✨ VIRAL MYSTERY BLIND BOXES",
-    "📿 CUSTOM ITALY MODULAR CHARMS",
+    "🎟️ EXCHANGE POINTS FOR VOUCHERS",
+    "📿 CONNECTED ITALY MODULAR CHARM BAND",
     "🚀 WALL-CLIMBING ANTI-GRAVITY RACERS",
     "🦄 FLUFFY GALAXY PLUSHIES",
-    "⭐ EARN VIP REWARDS ON EVERY TOY",
+    "⭐ EARN VIP REWARDS ON EVERY ITEM",
+    "🛒 MULTI-PRODUCT BULK CHECKOUT",
     "🇰🇭 FAST DELIVERY IN PHNOM PENH & PROVINCES",
     "📱 1-CLICK VERIFIED TELEGRAM ORDERS",
   ];
@@ -58,13 +59,13 @@ export default function HomePage() {
       {/* 5. Main Toy Catalog & Category Arcade */}
       <ProductGrid />
 
-      {/* 6. Interactive Mystery Blind Box Capsule Machine */}
-      <div id="mystery-box">
-        <MysteryBlindBox />
-      </div>
-
-      {/* 7. Interactive Italian Modular Charm Bracelet Studio */}
+      {/* 6. Interactive Connected Italian Modular Charm Bracelet Studio */}
       <CustomBraceletStudio />
+
+      {/* 7. Interactive Points-to-Voucher Rewards Exchange Hub */}
+      <div id="voucher-hub">
+        <VoucherRewardsHub />
+      </div>
 
       {/* 8. VIP Toy Club Rewards Callout Banner */}
       <section className="py-12 px-4 max-w-5xl mx-auto my-8">

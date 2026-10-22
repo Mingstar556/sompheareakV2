@@ -70,12 +70,19 @@ export const HeroSection: React.FC = () => {
             </a>
 
             <a
-              href="#mystery-box"
+              href="#voucher-hub"
               onClick={() => sounds.playChime()}
               className="px-5 py-4 rounded-2xl font-bold text-toy-yellow bg-toy-yellow/10 hover:bg-toy-yellow/20 border border-toy-yellow/30 font-fredoka text-sm flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
             >
-              <Gift className="w-4 h-4" />
-              <span>{t("heroCtaMystery")}</span>
+              <span>Exchange Points for Vouchers 🎟️</span>
+            </a>
+
+            <a
+              href="/cart"
+              onClick={() => sounds.playBounce()}
+              className="px-5 py-4 rounded-2xl font-bold text-toy-cyan bg-toy-cyan/10 hover:bg-toy-cyan/20 border border-toy-cyan/30 font-fredoka text-sm flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            >
+              <span>View Cart & Checkout 🛒</span>
             </a>
           </div>
 

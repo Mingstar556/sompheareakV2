@@ -39,9 +39,10 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: "Toys", href: "#toy-catalog", icon: "🧸" },
-    { label: "Mystery Box", href: "#mystery-box", icon: "🎁" },
-    { label: "Italy Charms", href: "#custom-bracelet-studio", icon: "🔗" },
+    { label: "Toys", href: "/#toy-catalog", icon: "🧸" },
+    { label: "Italy Charms", href: "/#custom-bracelet-studio", icon: "🔗" },
+    { label: "Voucher Hub", href: "/#voucher-hub", icon: "🎟️" },
+    { label: "Cart & Checkout", href: "/cart", icon: "🛒" },
   ];
 
   return (

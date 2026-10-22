@@ -285,17 +285,31 @@ export const CartDrawer: React.FC = () => {
                   </div>
 
                   {/* Proceed to Checkout Button */}
-                  <button
-                    onClick={() => {
-                      sounds.playPop();
-                      setCartDrawerOpen(false);
-                      setCheckoutModalOpen(true);
-                    }}
-                    className="w-full py-3.5 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
-                  >
-                    <span>{t("checkoutBtn")}</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        sounds.playPop();
+                        setCartDrawerOpen(false);
+                        setCheckoutModalOpen(true);
+                      }}
+                      className="w-full py-3.5 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-toy-pink via-toy-purple to-toy-cyan shadow-toy-glow font-fredoka text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all"
+                    >
+                      <span>{t("checkoutBtn")}</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+
+                    <a
+                      href="/cart"
+                      onClick={() => {
+                        sounds.playPop();
+                        setCartDrawerOpen(false);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <span>Open Full Cart Page (Multi-Item Checkout)</span>
+                      <span>→</span>
+                    </a>
+                  </div>
                 </div>
               )}
             </motion.div>

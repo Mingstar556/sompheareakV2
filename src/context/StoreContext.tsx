@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { CartItem, Currency, Language, Product, CustomBraceletItem, Voucher } from "@/types/store";
 import { TRANSLATIONS } from "@/data/translations";
+import { AVAILABLE_VOUCHERS } from "@/data/vouchers";
 import { sounds } from "@/utils/audio";
 import confetti from "canvas-confetti";
 
@@ -35,9 +36,6 @@ interface StoreContextType {
   viewer3DProduct: Product | null;
   setViewer3DProduct: (p: Product | null) => void;
 
-  mysteryBoxOpen: boolean;
-  setMysteryBoxOpen: (open: boolean) => void;
-
   rewardsModalOpen: boolean;
   setRewardsModalOpen: (open: boolean) => void;
 
@@ -56,6 +54,8 @@ interface StoreContextType {
   userPoints: number;
   addPoints: (pt: number) => void;
   redeemVoucherPoints: () => boolean;
+  exchangePointsForVoucher: (voucher: Voucher) => boolean;
+  claimedVouchers: string[];
   activeVoucher: Voucher | null;
   applyVoucherCode: (code: string) => boolean;
   removeVoucher: () => void;
@@ -75,7 +75,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [viewer3DProduct, setViewer3DProduct] = useState<Product | null>(null);
-  const [mysteryBoxOpen, setMysteryBoxOpen] = useState(false);
   const [rewardsModalOpen, setRewardsModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
 
@@ -83,8 +82,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("featured");
 
-  const [userPoints, setUserPoints] = useState(15);
+  const [userPoints, setUserPoints] = useState(25);
   const [activeVoucher, setActiveVoucher] = useState<Voucher | null>(null);
+  const [claimedVouchers, setClaimedVouchers] = useState<string[]>([]);
 
   // Load persisted settings from localStorage safely
   useEffect(() => {
@@ -273,25 +273,55 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (userPoints >= 25) {
       sounds.playFanfare();
       setUserPoints((prev) => prev - 25);
-      setActiveVoucher({
+      const voucher = AVAILABLE_VOUCHERS.find((v) => v.code === "VIP10OFF") || {
         code: "VIP10OFF",
         discountPct: 10,
+        discountType: "percentage" as const,
+        pointsCost: 25,
         minSpend: 0,
         description: "10% OFF VIP Reward Voucher",
         descriptionKh: "ប័ណ្ណបញ្ចុះតម្លៃ 10% សម្រាប់សមាជិក VIP",
-      });
+      };
+      setClaimedVouchers((prev) => Array.from(new Set([...prev, "VIP10OFF"])));
+      setActiveVoucher(voucher);
       return true;
     }
     return false;
   }, [userPoints]);
 
+  const exchangePointsForVoucher = useCallback((voucher: Voucher): boolean => {
+    if (userPoints >= voucher.pointsCost) {
+      sounds.playFanfare();
+      confetti({
+        particleCount: 65,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#f59e0b", "#ec4899", "#6366f1", "#10b981"],
+      });
+      setUserPoints((prev) => prev - voucher.pointsCost);
+      setClaimedVouchers((prev) => Array.from(new Set([...prev, voucher.code])));
+      setActiveVoucher(voucher);
+      return true;
+    }
+    sounds.playPop();
+    return false;
+  }, [userPoints]);
+
   const applyVoucherCode = useCallback((code: string): boolean => {
     const clean = code.trim().toUpperCase();
-    if (clean === "VIP10OFF" || clean === "WELCOME10" || clean === "KIDSTOY") {
+    const matched = AVAILABLE_VOUCHERS.find((v) => v.code === clean);
+    if (matched) {
+      sounds.playChime();
+      setActiveVoucher(matched);
+      return true;
+    }
+    if (clean === "WELCOME10" || clean === "KIDSTOY") {
       sounds.playChime();
       setActiveVoucher({
         code: clean,
         discountPct: 10,
+        discountType: "percentage",
+        pointsCost: 0,
         minSpend: 0,
         description: `10% OFF Voucher (${clean})`,
         descriptionKh: `ប័ណ្ណបញ្ចុះតម្លៃ 10% (${clean})`,
@@ -302,6 +332,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setActiveVoucher({
         code: clean,
         discountPct: 20,
+        discountType: "percentage",
+        pointsCost: 0,
         minSpend: 20,
         description: "20% OFF Super Kid Voucher (Orders > $20)",
         descriptionKh: "ប័ណ្ណបញ្ចុះតម្លៃ 20% (ការកុម្ម៉ង់លើសពី $20)",
@@ -357,8 +389,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setQuickViewProduct,
         viewer3DProduct,
         setViewer3DProduct,
-        mysteryBoxOpen,
-        setMysteryBoxOpen,
         rewardsModalOpen,
         setRewardsModalOpen,
         checkoutModalOpen,
@@ -372,6 +402,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         userPoints,
         addPoints,
         redeemVoucherPoints,
+        exchangePointsForVoucher,
+        claimedVouchers,
         activeVoucher,
         applyVoucherCode,
         removeVoucher,

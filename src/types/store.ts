@@ -77,9 +77,14 @@ export interface CartItem {
 export interface Voucher {
   code: string;
   discountPct: number;
+  fixedDiscountUsd?: number;
+  discountType: 'percentage' | 'fixed';
+  pointsCost: number;
   minSpend: number;
   description: string;
   descriptionKh: string;
+  badge?: string;
+  colorGrad?: string;
 }
 
 export interface UserProfile {
