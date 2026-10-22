@@ -39,6 +39,9 @@ import {
   ArrowUpRight,
   LogOut,
   RefreshCw,
+  Bell,
+  Database,
+  Volume2,
 } from "lucide-react";
 
 const ADMIN_PASSWORD = "Sompheareakshop1234";
@@ -64,9 +67,14 @@ export default function AdminPage() {
     orders,
     updateOrderStatus,
     deleteOrder,
+    saveOrder,
     vouchers,
     addVoucher,
     deleteVoucher,
+    notifications,
+    unreadNotificationCount,
+    markNotificationRead,
+    clearNotifications,
     currency,
     themeMode,
     toggleTheme,
@@ -80,7 +88,7 @@ export default function AdminPage() {
   const [shakeLogin, setShakeLogin] = useState<boolean>(false);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "vouchers">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "vouchers" | "notifications">("products");
 
   // Product Filters & Modal State
   const [productSearch, setProductSearch] = useState<string>("");
@@ -274,6 +282,65 @@ export default function AdminPage() {
     setVDescriptionKh("");
   };
 
+  // Simulate Realistic Test Order with Confirmation Notification
+  const handleSimulateTestOrder = () => {
+    sounds.playFanfare();
+    const randomProduct = products[Math.floor(Math.random() * products.length)] || products[0];
+    const testRef = `SR-TEST-${Math.floor(1000 + Math.random() * 9000)}`;
+    const sampleCustomerNames = ["Sokha Mean", "Bopha Rath", "Dara Pich", "Sreyleak Nget", "Vireak Chea"];
+    const randomName = sampleCustomerNames[Math.floor(Math.random() * sampleCustomerNames.length)];
+
+    const newOrder: CustomerOrder = {
+      id: `ord-${Date.now()}`,
+      orderRef: testRef,
+      customerName: `${randomName} (Live Test)`,
+      customerPhone: "099 888 777",
+      telegramHandle: `@${randomName.toLowerCase().replace(/\s+/g, "_")}`,
+      province: "Phnom Penh",
+      address: "Street 271, Sangkat Phsar Deum Thkov, Khan Chamkarmon",
+      paymentMethod: "khqr",
+      items: [
+        {
+          id: `item-${Date.now()}`,
+          quantity: 1,
+          product: randomProduct,
+        },
+      ],
+      subtotalUsd: randomProduct.price,
+      discountUsd: 0,
+      deliveryFeeUsd: 0,
+      totalUsd: randomProduct.price,
+      totalKhr: Math.round(randomProduct.price * 4100),
+      pointsEarned: randomProduct.pt || 5,
+      voucherCodeApplied: null,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+
+    saveOrder(newOrder);
+    showToast(`Test order ${testRef} simulated! Notification alert dispatched.`);
+  };
+
+  // Reset Testing DB
+  const handleResetDb = async () => {
+    if (!confirm("Are you sure you want to reset the testing DB to default products, orders, and vouchers?")) {
+      return;
+    }
+    sounds.playPop();
+    try {
+      const res = await fetch("/api/reset-db", { method: "POST" });
+      if (res.ok) {
+        localStorage.removeItem("somphea_products");
+        localStorage.removeItem("somphea_orders");
+        localStorage.removeItem("somphea_vouchers");
+        localStorage.removeItem("somphea_storefront_config");
+        window.location.reload();
+      }
+    } catch {
+      showToast("Error resetting database");
+    }
+  };
+
   // Metrics Calculation
   const totalRevenueUsd = orders.reduce((sum, o) => sum + (o.totalUsd || 0), 0);
   const pendingOrdersCount = orders.filter((o) => o.status === "pending").length;
@@ -422,13 +489,24 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* View Storefront Link */}
-            <Link
-              href="/"
-              target="_blank"
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+            {/* Reset Testing DB */}
+            <button
+              onClick={handleResetDb}
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+              title="Reset Test Database to initial default toys & orders"
             >
-              <span>View Storefront</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Reset DB</span>
+            </button>
+
+            {/* View Storefront Link with Direct Live Edit mode */}
+            <Link
+              href="/?admin_mode=true"
+              target="_blank"
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-toy-green-glow"
+              title="Open storefront with direct live-edit toolbar enabled"
+            >
+              <span>Edit Storefront Live 🛠️</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
 
@@ -577,6 +655,26 @@ export default function AdminPage() {
               <Ticket className="w-4 h-4" />
               <span>Vouchers ({vouchers.length})</span>
             </button>
+
+            <button
+              onClick={() => {
+                sounds.playPop();
+                setActiveTab("notifications");
+              }}
+              className={`px-5 py-2.5 rounded-2xl font-black font-fredoka text-xs sm:text-sm transition-all flex items-center gap-2 relative ${
+                activeTab === "notifications"
+                  ? "bg-emerald-600 text-white shadow-toy-green-glow"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800"
+              }`}
+            >
+              <Bell className="w-4 h-4" />
+              <span>Sim Alerts ({notifications.length})</span>
+              {unreadNotificationCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-black text-[10px] animate-pulse">
+                  {unreadNotificationCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {activeTab === "products" && (
@@ -616,6 +714,16 @@ export default function AdminPage() {
             >
               <Plus className="w-4 h-4" />
               <span>Create Voucher</span>
+            </button>
+          )}
+
+          {activeTab === "notifications" && (
+            <button
+              onClick={handleSimulateTestOrder}
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 text-white font-black font-fredoka text-xs sm:text-sm shadow-toy-green-glow flex items-center gap-2 hover:scale-102 active:scale-95 transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-toy-yellow" />
+              <span>Simulate Customer Order 🛒</span>
             </button>
           )}
         </div>
@@ -1035,6 +1143,175 @@ export default function AdminPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 4: REAL-TIME NOTIFICATIONS & STORE SIMULATION    */}
+        {/* ==================================================== */}
+        {activeTab === "notifications" && (
+          <div className="space-y-6">
+            {/* Simulation Control Card */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-900/40 via-teal-900/30 to-slate-900 border-2 border-emerald-500/40 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <h3 className="text-lg font-black font-fredoka text-white">
+                    Real-Time Shop Simulator & Order Dispatches
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-300 max-w-xl">
+                  Simulate customers placing orders and observe immediate order confirmation alerts, audio fanfares, and status dispatches. All data is persisted to the local test database.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2.5">
+                <button
+                  onClick={handleSimulateTestOrder}
+                  className="py-3 px-5 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-xs tracking-wide flex items-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
+                >
+                  <Sparkles className="w-4 h-4 text-toy-yellow" />
+                  <span>Simulate Customer Order 🛒</span>
+                </button>
+
+                {unreadNotificationCount > 0 && (
+                  <button
+                    onClick={() => {
+                      sounds.playPop();
+                      notifications.forEach((n) => markNotificationRead(n.id));
+                      showToast("All notifications marked as read");
+                    }}
+                    className="py-3 px-4 rounded-2xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs flex items-center gap-1.5 transition-all"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Mark All Read</span>
+                  </button>
+                )}
+
+                {notifications.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (confirm("Clear all simulation notifications?")) {
+                        sounds.playPop();
+                        clearNotifications();
+                        showToast("Notifications cleared");
+                      }
+                    }}
+                    className="py-3 px-4 rounded-2xl font-bold text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-xs flex items-center gap-1.5 transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Clear All</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Notifications Feed */}
+            {notifications.length === 0 ? (
+              <div className="py-16 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 space-y-3">
+                <Bell className="w-12 h-12 mx-auto text-slate-400 dark:text-slate-600 animate-pulse" />
+                <h4 className="font-black text-base font-fredoka text-slate-700 dark:text-slate-300">
+                  No notifications recorded yet
+                </h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Click &apos;Simulate Customer Order&apos; above or place an order from the live storefront to see real-time order confirmation dispatches!
+                </p>
+                <button
+                  onClick={handleSimulateTestOrder}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Send Test Order Now</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className={`p-4 sm:p-5 rounded-3xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                      notif.read
+                        ? "bg-white/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400"
+                        : "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-400 dark:border-emerald-600/50 text-slate-900 dark:text-white shadow-sm"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div
+                        className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 border ${
+                          notif.type === "order_confirmed"
+                            ? "bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700"
+                            : notif.type === "order_shipped"
+                            ? "bg-teal-100 dark:bg-teal-950/70 text-teal-600 dark:text-teal-400 border-teal-300 dark:border-teal-700"
+                            : notif.type === "order_delivered"
+                            ? "bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                            : "bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700"
+                        }`}
+                      >
+                        {notif.type === "order_confirmed" ? (
+                          <CheckCircle2 className="w-5 h-5" />
+                        ) : notif.type === "order_shipped" ? (
+                          <Truck className="w-5 h-5" />
+                        ) : notif.type === "order_delivered" ? (
+                          <Sparkles className="w-5 h-5" />
+                        ) : (
+                          <Package className="w-5 h-5" />
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-xs font-black px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                            {notif.orderRef}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            {new Date(notif.createdAt).toLocaleTimeString()} · {new Date(notif.createdAt).toLocaleDateString()}
+                          </span>
+                          {!notif.read && (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                              New Dispatch
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="font-black text-sm font-fredoka text-slate-900 dark:text-white">
+                          {notif.title}
+                        </h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                          {notif.message}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          sounds.playPop();
+                          setOrderSearch(notif.orderRef);
+                          setActiveTab("orders");
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1"
+                        title="View details in Customer Orders tab"
+                      >
+                        <span>View Order</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+
+                      {!notif.read && (
+                        <button
+                          onClick={() => {
+                            sounds.playPop();
+                            markNotificationRead(notif.id);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all"
+                        >
+                          Mark Read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>

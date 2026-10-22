@@ -7,6 +7,8 @@ import { Navbar } from "@/components/Navbar";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { ConnectedCharmLink } from "@/components/ConnectedCharmLink";
+import { NotificationToast } from "@/components/NotificationToast";
+import { AdminLiveStorefrontBar } from "@/components/admin/AdminLiveStorefrontBar";
 import { useStore } from "@/context/StoreContext";
 import { sounds } from "@/utils/audio";
 import { formatPrice } from "@/utils/currency";
@@ -673,6 +675,8 @@ export default function CartPage() {
       </div>
 
       <Footer />
+      <NotificationToast />
+      <AdminLiveStorefrontBar />
     </div>
   );
 }

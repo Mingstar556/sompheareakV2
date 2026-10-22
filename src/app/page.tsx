@@ -13,6 +13,8 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { RewardsModal } from "@/components/RewardsModal";
 import { ProductQuickViewModal } from "@/components/ProductQuickViewModal";
 import { ThreeToyViewer } from "@/components/ThreeToyViewer";
+import { NotificationToast } from "@/components/NotificationToast";
+import { AdminLiveStorefrontBar } from "@/components/admin/AdminLiveStorefrontBar";
 import { useStore } from "@/context/StoreContext";
 import { Sparkles, Trophy, Gift, ArrowRight, ShieldCheck, Heart } from "lucide-react";
 import { sounds } from "@/utils/audio";
@@ -113,6 +115,12 @@ export default function HomePage() {
       <CartDrawer />
       <CheckoutModal />
       <RewardsModal />
+
+      {/* Real-time Order Simulation Toast Banner */}
+      <NotificationToast />
+
+      {/* Admin Live Storefront Direct Edit Bar (Zero footprint for non-admins) */}
+      <AdminLiveStorefrontBar />
     </main>
   );
 }

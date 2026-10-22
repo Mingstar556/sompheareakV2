@@ -6,7 +6,7 @@ import { useStore } from "@/context/StoreContext";
 import { sounds } from "@/utils/audio";
 import { formatPrice, formatDiscountPrice } from "@/utils/currency";
 import { motion } from "framer-motion";
-import { ShoppingCart, Eye, Box, Sparkles, Star } from "lucide-react";
+import { ShoppingCart, Eye, Box, Sparkles, Star, Edit3 } from "lucide-react";
 import Image from "next/image";
 
 interface ProductCardProps {
@@ -14,7 +14,16 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart, setQuickViewProduct, setViewer3DProduct, currency, t, language } = useStore();
+  const {
+    addToCart,
+    setQuickViewProduct,
+    setViewer3DProduct,
+    currency,
+    t,
+    language,
+    isLiveEditMode,
+    setEditingDirectProduct,
+  } = useStore();
 
   const prices = formatDiscountPrice(product.price, product.discount, currency);
 
@@ -65,6 +74,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Box className="w-4 h-4 animate-pulse" />
       </button>
 
+      {/* Admin Direct Live Edit Button */}
+      {isLiveEditMode && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            sounds.playPop();
+            setEditingDirectProduct(product);
+          }}
+          className="absolute top-6 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-1.5 border-2 border-slate-950 hover:scale-105 active:scale-95 transition-all select-none animate-bounce"
+          title="Direct Edit Product Live on Storefront"
+        >
+          <Edit3 className="w-3.5 h-3.5" />
+          <span>Edit Toy</span>
+        </button>
+      )}
+
       {/* Product Image Thumbnail */}
       <div
         onClick={() => {
@@ -113,6 +138,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           >
             {language === "km" ? product.nameKh : product.name}
           </h3>
+          {isLiveEditMode && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                sounds.playPop();
+                setEditingDirectProduct(product);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-500 hover:text-amber-400 underline decoration-dashed mt-0.5"
+            >
+              <Edit3 className="w-3 h-3" />
+              <span>Direct Edit Details & Price</span>
+            </button>
+          )}
           <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
             {language === "km" ? product.bioKh : product.bio}
           </p>

@@ -119,3 +119,24 @@ export interface CustomerOrder {
   createdAt: string;
 }
 
+export interface OrderNotification {
+  id: string;
+  orderRef: string;
+  title: string;
+  message: string;
+  type: 'order_placed' | 'order_confirmed' | 'order_shipped' | 'order_delivered' | 'system';
+  read: boolean;
+  createdAt: string;
+}
+
+export interface StorefrontConfig {
+  announcementText: string;
+  heroBadge: string;
+  heroTitlePrefix: string;
+  heroTitleHighlight: string;
+  heroTitleSuffix: string;
+  heroSubtitle: string;
+  freeDeliveryThreshold: number;
+}
+
+

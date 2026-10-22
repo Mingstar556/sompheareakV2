@@ -1,7 +1,18 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { CartItem, Currency, Language, Product, CustomBraceletItem, Voucher, CustomerOrder, OrderStatus } from "@/types/store";
+import {
+  CartItem,
+  Currency,
+  Language,
+  Product,
+  CustomBraceletItem,
+  Voucher,
+  CustomerOrder,
+  OrderStatus,
+  OrderNotification,
+  StorefrontConfig,
+} from "@/types/store";
 import { TRANSLATIONS } from "@/data/translations";
 import { AVAILABLE_VOUCHERS } from "@/data/vouchers";
 import { PRODUCTS } from "@/data/products";
@@ -62,7 +73,7 @@ interface StoreContextType {
   removeVoucher: () => void;
 
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => Product;
+  addProduct: (product: Omit<Product, "id">) => Product;
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   resetProducts: () => void;
@@ -76,8 +87,38 @@ interface StoreContextType {
   addVoucher: (voucher: Voucher) => void;
   deleteVoucher: (code: string) => void;
 
+  // Real-Time Testing Notifications
+  notifications: OrderNotification[];
+  unreadNotificationCount: number;
+  markNotificationRead: (id: string) => void;
+  clearNotifications: () => void;
+  latestNotificationToast: OrderNotification | null;
+  dismissNotificationToast: () => void;
+
+  // Direct Live Storefront Editing
+  isAdminLoggedIn: boolean;
+  setIsAdminLoggedIn: (val: boolean) => void;
+  isLiveEditMode: boolean;
+  setLiveEditMode: (val: boolean) => void;
+  storefrontConfig: StorefrontConfig;
+  updateStorefrontConfig: (updates: Partial<StorefrontConfig>) => void;
+  editingDirectProduct: Product | null;
+  setEditingDirectProduct: (p: Product | null) => void;
+  copyModalOpen: boolean;
+  setCopyModalOpen: (val: boolean) => void;
+
   t: (key: keyof typeof TRANSLATIONS.en, params?: Record<string, string | number>) => string;
 }
+
+const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
+  announcementText: "🚀 VIRAL TOY DROP: FLASH SALE UP TO 30% OFF · FREE PHNOM PENH DELIVERY OVER $25! 🇰🇭",
+  heroBadge: "🔥 TOP DROPS OF 2026",
+  heroTitlePrefix: "THE ULTIMATE",
+  heroTitleHighlight: "TOY & CHARM",
+  heroTitleSuffix: "UNIVERSE",
+  heroSubtitle: "Explore viral minifigures, anti-gravity RC racers, surprise blind boxes, and genuine Italian modular stainless steel charm bracelets.",
+  freeDeliveryThreshold: 25.0,
+};
 
 const INITIAL_DEMO_ORDERS: CustomerOrder[] = [
   {
@@ -141,6 +182,27 @@ const INITIAL_DEMO_ORDERS: CustomerOrder[] = [
   },
 ];
 
+const INITIAL_NOTIFICATIONS: OrderNotification[] = [
+  {
+    id: "notif-1",
+    orderRef: "SR-8491",
+    title: "Order Confirmed: #SR-8491",
+    message: "Order for Sokha Mean confirmed ($22.80). KHQR payment verified.",
+    type: "order_confirmed",
+    read: false,
+    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+  },
+  {
+    id: "notif-2",
+    orderRef: "SR-9214",
+    title: "Order Shipped: #SR-9214",
+    message: "Dara Heng's order dispatched via express provincial carrier.",
+    type: "order_shipped",
+    read: false,
+    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+  },
+];
+
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -150,7 +212,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(true);
 
   const [products, setProductsState] = useState<Product[]>(PRODUCTS);
-  const [orders, setOrdersState] = useState<CustomerOrder[]>([]);
+  const [orders, setOrdersState] = useState<CustomerOrder[]>(INITIAL_DEMO_ORDERS);
   const [vouchers, setVouchersState] = useState<Voucher[]>(AVAILABLE_VOUCHERS);
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -168,7 +230,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeVoucher, setActiveVoucher] = useState<Voucher | null>(null);
   const [claimedVouchers, setClaimedVouchers] = useState<string[]>([]);
 
-  // Load persisted settings from localStorage safely
+  // Notifications State
+  const [notifications, setNotifications] = useState<OrderNotification[]>(INITIAL_NOTIFICATIONS);
+  const [latestNotificationToast, setLatestNotificationToast] = useState<OrderNotification | null>(null);
+
+  // Live Storefront Direct Edit Mode
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isLiveEditMode, setLiveEditMode] = useState(false);
+  const [storefrontConfig, setStorefrontConfig] = useState<StorefrontConfig>(DEFAULT_STOREFRONT_CONFIG);
+  const [editingDirectProduct, setEditingDirectProduct] = useState<Product | null>(null);
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
+
+  // Load persisted settings and sync with testing backend DB
   useEffect(() => {
     try {
       const savedCurr = localStorage.getItem("somphea_currency") as Currency | null;
@@ -191,9 +264,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const savedSound = localStorage.getItem("somphea_sound");
       if (savedSound !== null) {
-        const en = savedSound === "true";
-        setSoundEnabledState(en);
-        sounds.setEnabled(en);
+        const enabled = savedSound === "true";
+        setSoundEnabledState(enabled);
+        sounds.setEnabled(enabled);
       }
 
       const savedCart = localStorage.getItem("somphea_cart");
@@ -206,41 +279,63 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setUserPoints(parseInt(savedPts, 10));
       }
 
-      const savedProds = localStorage.getItem("somphea_products");
-      if (savedProds) {
-        try {
-          const parsed = JSON.parse(savedProds);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setProductsState(parsed);
-          }
-        } catch {}
-      }
-
-      const savedOrders = localStorage.getItem("somphea_orders");
-      if (savedOrders) {
-        try {
-          const parsed = JSON.parse(savedOrders);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setOrdersState(parsed);
-          } else {
-            setOrdersState(INITIAL_DEMO_ORDERS);
-          }
-        } catch {
-          setOrdersState(INITIAL_DEMO_ORDERS);
+      // Check admin status & query param
+      if (typeof window !== "undefined") {
+        const isAuth = sessionStorage.getItem("somphea_admin_auth") === "true";
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("admin_mode") === "true") {
+          sessionStorage.setItem("somphea_admin_auth", "true");
+          setIsAdminLoggedIn(true);
+          setLiveEditMode(true);
+        } else if (isAuth) {
+          setIsAdminLoggedIn(true);
         }
-      } else {
-        setOrdersState(INITIAL_DEMO_ORDERS);
-        localStorage.setItem("somphea_orders", JSON.stringify(INITIAL_DEMO_ORDERS));
-      }
 
-      const savedVouchers = localStorage.getItem("somphea_vouchers");
-      if (savedVouchers) {
-        try {
-          const parsed = JSON.parse(savedVouchers);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setVouchersState(parsed);
-          }
-        } catch {}
+        // Fetch fresh database state from Testing Server API
+        fetch("/api/products")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+              setProductsState(d.data);
+            }
+          })
+          .catch(() => {});
+
+        fetch("/api/orders")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.data)) {
+              setOrdersState(d.data);
+            }
+          })
+          .catch(() => {});
+
+        fetch("/api/vouchers")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.data)) {
+              setVouchersState(d.data);
+            }
+          })
+          .catch(() => {});
+
+        fetch("/api/notifications")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.data)) {
+              setNotifications(d.data);
+            }
+          })
+          .catch(() => {});
+
+        fetch("/api/store-config")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && d.data) {
+              setStorefrontConfig(d.data);
+            }
+          })
+          .catch(() => {});
       }
     } catch {
       // ignore SSR or storage exceptions
@@ -299,103 +394,103 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, []);
 
-  // Sync cart to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("somphea_cart", JSON.stringify(cart));
-    } catch {
-      // ignore
-    }
-  }, [cart]);
-
-  // Sync points to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("somphea_points", String(userPoints));
-    } catch {
-      // ignore
-    }
-  }, [userPoints]);
-
-  const addToCart = useCallback((product: Product, quantity: number = 1) => {
-    sounds.playChime();
-    confetti({
-      particleCount: 35,
-      spread: 60,
-      origin: { y: 0.8 },
-      colors: ["#f43f5e", "#6366f1", "#fbbf24", "#06b6d4"],
-    });
-
+  // Cart operations
+  const addToCart = useCallback((product: Product, quantity = 1) => {
+    sounds.playCharmSnap();
     setCart((prev) => {
-      const existingIdx = prev.findIndex((item) => item.product?.id === product.id);
-      if (existingIdx > -1) {
-        const next = [...prev];
-        next[existingIdx].quantity += quantity;
-        return next;
+      const existing = prev.find((item) => item.product?.id === product.id);
+      let updated: CartItem[];
+      if (existing) {
+        updated = prev.map((item) =>
+          item.product?.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+        );
+      } else {
+        updated = [...prev, { id: `cart-${product.id}-${Date.now()}`, product, quantity }];
       }
-      return [...prev, { id: `cart-${product.id}-${Date.now()}`, product, quantity }];
+      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      return updated;
     });
+    setCartDrawerOpen(true);
   }, []);
 
   const addCustomBraceletToCart = useCallback((bracelet: CustomBraceletItem) => {
     sounds.playFanfare();
     confetti({
-      particleCount: 50,
+      particleCount: 80,
       spread: 70,
-      origin: { y: 0.7 },
-      colors: ["#10b981", "#fbbf24", "#6366f1", "#f43f5e"],
+      origin: { y: 0.6 },
+      colors: ["#10b981", "#fbbf24", "#6366f1", "#ec4899"],
     });
 
-    setCart((prev) => [
-      ...prev,
-      {
-        id: `cart-bracelet-${Date.now()}`,
-        customBracelet: bracelet,
-        quantity: bracelet.quantity,
-        isCustom: true,
-      },
-    ]);
+    const cartItem: CartItem = {
+      id: `cart-bracelet-${Date.now()}`,
+      customBracelet: bracelet,
+      quantity: 1,
+      isCustom: true,
+    };
+
+    setCart((prev) => {
+      const updated = [...prev, cartItem];
+      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      return updated;
+    });
     setCartDrawerOpen(true);
   }, []);
 
   const removeFromCart = useCallback((itemId: string) => {
     sounds.playPop();
-    setCart((prev) => prev.filter((item) => item.id !== itemId));
+    setCart((prev) => {
+      const updated = prev.filter((item) => item.id !== itemId);
+      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const updateQuantity = useCallback((itemId: string, delta: number) => {
     sounds.playPop();
-    setCart((prev) =>
-      prev
+    setCart((prev) => {
+      const updated = prev
         .map((item) => {
           if (item.id === itemId) {
-            const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
+            const newQ = item.quantity + delta;
+            return newQ > 0 ? { ...item, quantity: newQ } : null;
           }
           return item;
         })
-        .filter(Boolean) as CartItem[]
-    );
+        .filter((item): item is CartItem => item !== null);
+      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const clearCart = useCallback(() => {
     setCart([]);
+    localStorage.removeItem("somphea_cart");
   }, []);
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
+  // Points & Vouchers
   const addPoints = useCallback((pt: number) => {
-    setUserPoints((prev) => prev + pt);
+    setUserPoints((prev) => {
+      const next = prev + pt;
+      localStorage.setItem("somphea_points", String(next));
+      return next;
+    });
   }, []);
 
-  const redeemVoucherPoints = useCallback(() => {
+  const redeemVoucherPoints = useCallback((): boolean => {
     if (userPoints >= 25) {
       sounds.playFanfare();
-      setUserPoints((prev) => prev - 25);
-      const voucher = AVAILABLE_VOUCHERS.find((v) => v.code === "VIP10OFF") || {
+      setUserPoints((prev) => {
+        const next = prev - 25;
+        localStorage.setItem("somphea_points", String(next));
+        return next;
+      });
+      const voucher: Voucher = {
         code: "VIP10OFF",
         discountPct: 10,
-        discountType: "percentage" as const,
+        discountType: "percentage",
         pointsCost: 25,
         minSpend: 0,
         description: "10% OFF VIP Reward Voucher",
@@ -428,7 +523,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const applyVoucherCode = useCallback((code: string): boolean => {
     const clean = code.trim().toUpperCase();
-    const matched = AVAILABLE_VOUCHERS.find((v) => v.code === clean);
+    const matched = vouchers.find((v) => v.code === clean);
     if (matched) {
       sounds.playChime();
       setActiveVoucher(matched);
@@ -460,14 +555,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return true;
     }
     return false;
-  }, []);
+  }, [vouchers]);
 
   const removeVoucher = useCallback(() => {
     sounds.playPop();
     setActiveVoucher(null);
   }, []);
 
-  // Translation helper with parametric placeholder replacement
+  // Translation helper
   const t = useCallback(
     (key: keyof typeof TRANSLATIONS.en, params?: Record<string, string | number>): string => {
       const dict = TRANSLATIONS[language] || TRANSLATIONS.en;
@@ -482,15 +577,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [language]
   );
 
-  // Admin & Catalog Management
+  // Admin & Catalog Management with Testing Server DB Sync
   const addProduct = useCallback((newProd: Omit<Product, "id">): Product => {
     const id = `toy-${Date.now()}`;
     const product: Product = { ...newProd, id };
+
     setProductsState((prev) => {
       const updated = [product, ...prev];
       localStorage.setItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
+
+    // Sync to testing backend server
+    fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product),
+    }).catch(() => {});
+
     return product;
   }, []);
 
@@ -500,6 +604,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
+
+    // Sync to testing backend server
+    fetch(`/api/products/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
   }, []);
 
   const deleteProduct = useCallback((id: string) => {
@@ -508,28 +619,84 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
+
+    fetch(`/api/products/${id}`, { method: "DELETE" }).catch(() => {});
   }, []);
 
   const resetProducts = useCallback(() => {
     setProductsState(PRODUCTS);
     localStorage.setItem("somphea_products", JSON.stringify(PRODUCTS));
+    fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
+    }).catch(() => {});
   }, []);
 
-  // Customer Orders Management
+  // Customer Orders Management with Testing Notifications
   const saveOrder = useCallback((order: CustomerOrder) => {
     setOrdersState((prev) => {
       const updated = [order, ...prev];
       localStorage.setItem("somphea_orders", JSON.stringify(updated));
       return updated;
     });
+
+    // Trigger confirmation notification immediately
+    const notif: OrderNotification = {
+      id: `notif-${Date.now()}`,
+      orderRef: order.orderRef,
+      title: `🎉 Order Confirmed: #${order.orderRef}`,
+      message: `Thank you ${order.customerName}! Your order of $${order.totalUsd.toFixed(2)} (${order.paymentMethod.toUpperCase()}) is confirmed. Express dispatch underway.`,
+      type: "order_confirmed",
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setNotifications((prev) => [notif, ...prev]);
+    setLatestNotificationToast(notif);
+
+    // Sync to testing server DB
+    fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(order),
+    }).catch(() => {});
   }, []);
 
   const updateOrderStatus = useCallback((orderId: string, status: OrderStatus) => {
+    let orderRef = "SR-ORDER";
     setOrdersState((prev) => {
-      const updated = prev.map((o) => (o.id === orderId ? { ...o, status } : o));
+      const updated = prev.map((o) => {
+        if (o.id === orderId) {
+          orderRef = o.orderRef;
+          return { ...o, status };
+        }
+        return o;
+      });
       localStorage.setItem("somphea_orders", JSON.stringify(updated));
       return updated;
     });
+
+    // Dispatch status alert notification
+    const notif: OrderNotification = {
+      id: `notif-${Date.now()}`,
+      orderRef,
+      title: `Order #${orderRef} Updated: ${status.toUpperCase()}`,
+      message: `Warehouse tracking updated status to ${status.toUpperCase()} for order #${orderRef}.`,
+      type: status === "delivered" ? "order_delivered" : status === "shipped" ? "order_shipped" : "order_confirmed",
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setNotifications((prev) => [notif, ...prev]);
+    setLatestNotificationToast(notif);
+
+    // Sync to testing server DB
+    fetch(`/api/orders/${orderId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
   }, []);
 
   const deleteOrder = useCallback((orderId: string) => {
@@ -538,7 +705,29 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem("somphea_orders", JSON.stringify(updated));
       return updated;
     });
+    fetch(`/api/orders/${orderId}`, { method: "DELETE" }).catch(() => {});
   }, []);
+
+  // Notifications helpers
+  const markNotificationRead = useCallback((id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }).catch(() => {});
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
+    fetch("/api/notifications", { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  const dismissNotificationToast = useCallback(() => {
+    setLatestNotificationToast(null);
+  }, []);
+
+  const unreadNotificationCount = notifications.filter((n) => !n.read).length;
 
   // Voucher Management
   const addVoucher = useCallback((voucher: Voucher) => {
@@ -547,6 +736,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
       return updated;
     });
+    fetch("/api/vouchers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(voucher),
+    }).catch(() => {});
   }, []);
 
   const deleteVoucher = useCallback((code: string) => {
@@ -555,6 +749,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
       return updated;
     });
+    fetch(`/api/vouchers?code=${encodeURIComponent(code)}`, { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  // Storefront Config Live Editing
+  const updateStorefrontConfig = useCallback((updates: Partial<StorefrontConfig>) => {
+    setStorefrontConfig((prev) => {
+      const next = { ...prev, ...updates };
+      localStorage.setItem("somphea_storefront_config", JSON.stringify(next));
+      return next;
+    });
+    fetch("/api/store-config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
   }, []);
 
   return (
@@ -613,6 +822,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         vouchers,
         addVoucher,
         deleteVoucher,
+        notifications,
+        unreadNotificationCount,
+        markNotificationRead,
+        clearNotifications,
+        latestNotificationToast,
+        dismissNotificationToast,
+        isAdminLoggedIn,
+        setIsAdminLoggedIn,
+        isLiveEditMode,
+        setLiveEditMode,
+        storefrontConfig,
+        updateStorefrontConfig,
+        editingDirectProduct,
+        setEditingDirectProduct,
+        copyModalOpen,
+        setCopyModalOpen,
         t,
       }}
     >

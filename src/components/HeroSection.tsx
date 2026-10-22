@@ -2,13 +2,19 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift } from "lucide-react";
+import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift, Edit3 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { ThreeHeroCanvas } from "./ThreeHeroCanvas";
 import { sounds } from "@/utils/audio";
 
 export const HeroSection: React.FC = () => {
-  const { t } = useStore();
+  const { t, storefrontConfig, isLiveEditMode, setCopyModalOpen } = useStore();
+
+  const heroBadge = storefrontConfig?.heroBadge || t("heroBadge");
+  const heroTitlePrefix = storefrontConfig?.heroTitlePrefix || t("heroTitlePrefix");
+  const heroTitleHighlight = storefrontConfig?.heroTitleHighlight || t("heroTitleHighlight");
+  const heroTitleSuffix = storefrontConfig?.heroTitleSuffix || t("heroTitleSuffix");
+  const heroSubtitle = storefrontConfig?.heroSubtitle || t("heroSubtitle");
 
   return (
     <section className="relative overflow-hidden pt-8 pb-16 lg:py-20 px-4 max-w-7xl mx-auto">
@@ -25,29 +31,45 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="lg:col-span-6 xl:col-span-7 space-y-6 text-center lg:text-left"
         >
-          {/* Top Drop Badge */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:via-toy-purple/20 dark:to-teal-500/20 border border-emerald-400 dark:border-emerald-500/40 shadow-toy-green-glow text-emerald-900 dark:text-white text-xs font-black tracking-wider uppercase font-fredoka"
-          >
-            <Sparkles className="w-4 h-4 text-amber-500 dark:text-toy-yellow animate-spin" style={{ animationDuration: "6s" }} />
-            <span>{t("heroBadge")}</span>
-          </motion.div>
+          {/* Top Drop Badge & Admin Edit Trigger */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:via-toy-purple/20 dark:to-teal-500/20 border border-emerald-400 dark:border-emerald-500/40 shadow-toy-green-glow text-emerald-900 dark:text-white text-xs font-black tracking-wider uppercase font-fredoka"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500 dark:text-toy-yellow animate-spin" style={{ animationDuration: "6s" }} />
+              <span>{heroBadge}</span>
+            </motion.div>
+
+            {isLiveEditMode && (
+              <button
+                onClick={() => {
+                  sounds.playPop();
+                  setCopyModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black shadow-xl border-2 border-slate-950 animate-bounce transition-all select-none"
+                title="Direct edit storefront hero headlines & badge"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Hero Text</span>
+              </button>
+            )}
+          </div>
 
           {/* Hero Main Heading */}
           <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black text-slate-900 dark:text-white font-fredoka tracking-tight leading-[1.12]">
-            {t("heroTitlePrefix")}{" "}
+            {heroTitlePrefix}{" "}
             <span className="bg-gradient-to-r from-emerald-600 via-teal-500 to-green-600 dark:from-toy-yellow dark:via-toy-pink dark:to-toy-cyan bg-clip-text text-transparent drop-shadow-sm">
-              {t("heroTitleHighlight")}
+              {heroTitleHighlight}
             </span>{" "}
-            {t("heroTitleSuffix")}
+            {heroTitleSuffix}
           </h1>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
-            {t("heroSubtitle")}
+            {heroSubtitle}
           </p>
 
           {/* Big Chunky CTA Action Buttons */}
