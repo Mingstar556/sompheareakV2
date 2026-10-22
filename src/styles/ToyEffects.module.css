@@ -1,0 +1,64 @@
+/* Custom CSS Module for Somphea Reak Toy Effects */
+
+.toyGlowContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+.iridescentSheen {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.12) 65%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shine 4s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.tactile3dButton {
+  box-shadow: 0 6px 0px 0px rgba(0, 0, 0, 0.28);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tactile3dButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0px 0px rgba(0, 0, 0, 0.25);
+}
+
+.tactile3dButton:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0px 0px rgba(0, 0, 0, 0.3);
+}
+
+.floatingSticker {
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+  animation: floatWiggle 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatWiggle {
+  0% {
+    transform: translateY(0px) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.candypill {
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}

@@ -1,0 +1,91 @@
+export type Currency = 'USD' | 'KHR';
+export type Language = 'en' | 'km';
+
+export interface Category {
+  id: string;
+  name: string;
+  kh: string;
+  en: string;
+  icon: string;
+  grad: string;
+  sort_order: number;
+  description: string;
+}
+
+export type ToyRarity = 'Common' | 'Rare' | 'Super Rare' | 'Legendary' | 'Limited Edition';
+
+export interface Product {
+  id: string;
+  name: string;
+  nameKh: string;
+  cat: string;
+  price: number; // in USD
+  discount: number; // percentage (e.g. 15 for 15% off)
+  stock: number;
+  pt: number; // Reward points earned
+  image: string;
+  bio: string;
+  bioKh: string;
+  rarity?: ToyRarity;
+  rating?: number;
+  reviewsCount?: number;
+  featured?: boolean;
+  isNew?: boolean;
+  free_delivery?: boolean;
+  ageRecommendation?: string;
+  colorScheme?: string[];
+  dimensions?: string;
+}
+
+export interface Charm {
+  id: string;
+  name: string;
+  nameKh: string;
+  category: 'emblem' | 'letter' | 'stone' | 'cute' | 'anime';
+  price: number;
+  image: string;
+  plateImage?: string;
+  isPopular?: boolean;
+}
+
+export interface CustomBraceletLink {
+  slot: number;
+  charmId: string | null;
+  finish: 'silver' | 'gold' | 'rose' | 'black';
+}
+
+export interface CustomBraceletItem {
+  id: string;
+  styleId: string;
+  finish: 'silver' | 'gold' | 'rose' | 'black';
+  sizeLinks: number;
+  charms: { slot: number; charm: Charm }[];
+  packaging: 'basic' | 'premium';
+  unitPrice: number;
+  quantity: number;
+  points: number;
+}
+
+export interface CartItem {
+  id: string;
+  product?: Product;
+  customBracelet?: CustomBraceletItem;
+  quantity: number;
+  isCustom?: boolean;
+}
+
+export interface Voucher {
+  code: string;
+  discountPct: number;
+  minSpend: number;
+  description: string;
+  descriptionKh: string;
+}
+
+export interface UserProfile {
+  name: string;
+  phone: string;
+  telegramUsername: string;
+  points: number;
+  savedVouchers: string[];
+}
