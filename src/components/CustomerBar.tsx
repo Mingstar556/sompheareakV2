@@ -36,12 +36,18 @@ export const CustomerBar: React.FC = () => {
       ).length
     : orders.length;
 
-  const handleRefresh = () => {
+  const handleLogoClick = () => {
     sounds.playFanfare();
     setIsRotating(true);
     setTimeout(() => {
-      window.location.reload();
-    }, 450);
+      // Refresh and bring customer back to homepage
+      if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
+        window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+        window.location.reload();
+      } else {
+        window.location.href = "/";
+      }
+    }, 350);
   };
 
   const handleHome = () => {
@@ -54,7 +60,7 @@ export const CustomerBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-3 inset-x-0 z-40 flex justify-center pointer-events-none px-3 sm:px-4">
+    <div className="fixed bottom-3 sm:bottom-4 pb-[env(safe-area-inset-bottom,0px)] inset-x-0 z-40 flex justify-center pointer-events-none px-3 sm:px-4">
       <motion.div
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -89,32 +95,34 @@ export const CustomerBar: React.FC = () => {
           )}
         </button>
 
-        {/* 3. Center Logo (Click to Refresh the page!) */}
+        {/* 3. Center Logo (Click to Refresh the page & Return Home!) */}
         <button
-          onClick={handleRefresh}
-          className="relative -top-3.5 flex flex-col items-center group focus:outline-none"
-          title="Click Logo to Refresh Storefront"
+          onClick={handleLogoClick}
+          className="relative -top-5 sm:-top-6 flex flex-col items-center group focus:outline-none"
+          title="Click Logo to Return Home and Refresh"
         >
           <div
-            className={`w-13 h-13 sm:w-14 sm:h-14 rounded-full p-1 bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-600 shadow-toy-green-glow border-2 border-white dark:border-slate-900 group-hover:scale-110 active:scale-95 transition-all cursor-pointer relative overflow-hidden ${
+            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full p-1 bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-600 shadow-toy-green-glow border-2 border-white dark:border-slate-900 group-hover:scale-110 active:scale-95 transition-all cursor-pointer relative overflow-hidden ${
               isRotating ? "animate-spin" : ""
             }`}
           >
-            <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-950">
+            <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-950 shadow-inner">
               <Image
                 src="/assets/logo.jpg"
                 alt="Somphea Reak Mascot Logo"
                 fill
+                sizes="(max-width: 640px) 56px, 64px"
                 className="object-cover"
+                priority
               />
             </div>
-            {/* Spinning refresh hint badge */}
+            {/* Spinning refresh hint badge on hover */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-full transition-opacity">
-              <RefreshCw className="w-4 h-4 text-white animate-spin" />
+              <RefreshCw className="w-5 h-5 text-white animate-spin" />
             </div>
           </div>
-          <span className="text-[9px] font-black font-fredoka uppercase text-emerald-600 dark:text-emerald-400 tracking-wider mt-0.5 whitespace-nowrap bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.2 rounded-full border border-emerald-300 dark:border-emerald-700/40 shadow-sm">
-            Refresh 🔄
+          <span className="text-[10px] font-black font-fredoka uppercase text-emerald-600 dark:text-emerald-400 tracking-wider mt-0.5 whitespace-nowrap bg-emerald-50 dark:bg-slate-900 px-2 py-0.5 rounded-full border border-emerald-400/60 dark:border-emerald-700/60 shadow-sm flex items-center gap-1">
+            Home 🔄
           </span>
         </button>
 

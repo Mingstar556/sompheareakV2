@@ -16,6 +16,14 @@ interface ConnectedCharmLinkProps {
   engravedText?: string | null;
 }
 
+export const finishLinkImages: Record<string, string> = {
+  silver: "/assets/links_tight/link_plain.webp",
+  gold: "/assets/links_tight/link_new_style_2.webp",
+  rose: "/assets/links_tight/link_new_style_3.webp",
+  black: "/assets/links_tight/link_new_style_4.webp",
+  red: "/assets/links_tight/link_new_style_1.webp",
+};
+
 export const ConnectedCharmLink: React.FC<ConnectedCharmLinkProps> = ({
   charm,
   slotIndex,
@@ -26,136 +34,94 @@ export const ConnectedCharmLink: React.FC<ConnectedCharmLinkProps> = ({
   size = "workbench",
   engravedText,
 }) => {
-  // Dimensions based on authentic Italian modular charm ratio (184 x 158)
+  // Sizing matching authentic Italian 9mm modular link ratio (~1.14:1)
   const sizeMap = {
     workbench: {
-      w: "w-[58px] sm:w-[68px]",
-      h: "h-[50px] sm:h-[58px]",
-      overlap: "-ml-[2px] sm:-ml-[3px]",
+      w: "w-[66px] sm:w-[78px]",
       fontSize: "text-[9px] sm:text-[10px]",
     },
     preview: {
-      w: "w-[46px] sm:w-[54px]",
-      h: "h-[39px] sm:h-[46px]",
-      overlap: "-ml-[2px]",
+      w: "w-[50px] sm:w-[58px]",
       fontSize: "text-[8px]",
     },
     compact: {
-      w: "w-[36px]",
-      h: "h-[31px]",
-      overlap: "-ml-[1.5px]",
+      w: "w-[36px] sm:w-[42px]",
       fontSize: "text-[7px]",
     },
   };
 
   const currentSize = sizeMap[size];
+  const blankImage = finishLinkImages[finish] || finishLinkImages.silver;
 
-  const finishBevels = {
-    silver: {
-      border: "border-slate-300 dark:border-slate-400",
-      plateBg: "bg-gradient-to-b from-slate-100 via-slate-200 to-slate-300",
-      glow: "shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(0,0,0,0.3)]",
-      engraved: "text-slate-800 drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]",
-    },
-    gold: {
-      border: "border-amber-400 dark:border-amber-300",
-      plateBg: "bg-gradient-to-b from-yellow-100 via-amber-200 to-amber-300",
-      glow: "shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(180,83,9,0.4)]",
-      engraved: "text-amber-950 drop-shadow-[0_1px_0_rgba(255,255,255,0.5)]",
-    },
-    rose: {
-      border: "border-rose-300 dark:border-rose-400",
-      plateBg: "bg-gradient-to-b from-rose-100 via-rose-200 to-rose-300",
-      glow: "shadow-[inset_0_1px_1px_rgba(255,255,255,0.85),inset_0_-1px_1px_rgba(190,24,93,0.35)]",
-      engraved: "text-rose-950 drop-shadow-[0_1px_0_rgba(255,255,255,0.5)]",
-    },
-    black: {
-      border: "border-slate-600 dark:border-slate-500",
-      plateBg: "bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900",
-      glow: "shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),inset_0_-1px_1px_rgba(0,0,0,0.6)]",
-      engraved: "text-slate-200 drop-shadow-[0_1px_0_rgba(0,0,0,0.9)]",
-    },
-  };
-
-  const bevel = finishBevels[finish];
+  // The uploaded charm image IS ALREADY the charm with no background and metallic borders!
+  // Render it directly as a normal element without any template overlays or cavity cropping.
+  const charmSrc = charm ? (charm.image || charm.plateImage || blankImage) : blankImage;
 
   return (
     <motion.div
       layout
-      whileHover={{ y: -4, scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ y: -3, scale: 1.03 }}
+      whileTap={{ scale: 0.96 }}
       onClick={onSelect}
-      className={`relative ${currentSize.w} ${currentSize.h} ${
-        slotIndex > 0 ? currentSize.overlap : ""
-      } flex-shrink-0 cursor-pointer select-none transition-all duration-200 ${
-        isSelected ? "z-20 scale-105" : "z-10"
+      className={`group relative ${currentSize.w} aspect-[1.14/1] flex-shrink-0 cursor-pointer select-none transition-all duration-150 ${
+        isSelected ? "z-30 scale-105" : "z-10"
       }`}
-      title={charm ? `${charm.name} (Click to remove/edit)` : `Slot #${slotIndex + 1}: Stainless blank link`}
+      title={
+        charm
+          ? `${charm.name} (Click to remove/reorder)`
+          : `Slot #${slotIndex + 1}: ${finish.toUpperCase()} Inox modular link`
+      }
     >
-      {/* Outer Interlocking Stainless Steel Plate with spring notches */}
-      <div
-        className={`w-full h-full rounded-[4px] border ${bevel.border} ${bevel.plateBg} ${bevel.glow} p-[2px] flex items-center justify-center relative overflow-hidden`}
-      >
-        {/* Left & Right Mechanical Spring Hinges (interlocking teeth) */}
-        <div className="absolute left-0 inset-y-1 w-[2px] bg-black/20 rounded-r" />
-        <div className="absolute right-0 inset-y-1 w-[2px] bg-black/20 rounded-l" />
+      {/* Direct Charm Element Display with Soft Interlocking Shadow */}
+      <div className="relative w-full h-full flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]">
+        <Image
+          src={charmSrc}
+          alt={charm?.name || "Italian Modular Charm Link"}
+          fill
+          className="object-contain"
+          sizes="120px"
+          unoptimized={Boolean(charmSrc?.startsWith("data:"))}
+          priority={slotIndex < 8}
+        />
 
-        {/* Top & Bottom Precision Inox Bevel Lines */}
-        <div className="absolute inset-x-1 top-0 h-[1.5px] bg-white/40" />
-        <div className="absolute inset-x-1 bottom-0 h-[1.5px] bg-black/30" />
+        {/* Optional Engraved Text or Slot Number for Blank Links */}
+        {!charm && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            {engravedText ? (
+              <span
+                className={`font-serif font-black uppercase tracking-wider text-slate-800 drop-shadow-[0_1px_0_rgba(255,255,255,0.7)] ${currentSize.fontSize}`}
+              >
+                {engravedText}
+              </span>
+            ) : (
+              <span className="text-[9px] font-mono font-bold text-slate-500 opacity-40">
+                #{slotIndex + 1}
+              </span>
+            )}
+          </div>
+        )}
 
-        {/* Center Artwork: Charm Plate or Blank Stainless Plate */}
-        <div className="relative w-full h-full flex items-center justify-center">
-          {charm ? (
-            <div className="relative w-full h-full">
-              <Image
-                src={charm.plateImage || charm.image}
-                alt={charm.name}
-                fill
-                className="object-contain"
-                sizes="70px"
-              />
-            </div>
-          ) : (
-            /* Blank Stainless Link */
-            <div className="w-full h-full flex flex-col items-center justify-center relative">
-              <Image
-                src="/assets/charm_clean.png"
-                alt="Stainless Link"
-                fill
-                className="object-contain opacity-85"
-                sizes="70px"
-              />
-              {engravedText ? (
-                <span
-                  className={`relative z-10 font-serif font-black uppercase tracking-wider ${currentSize.fontSize} ${bevel.engraved}`}
-                >
-                  {engravedText}
-                </span>
-              ) : (
-                <span className="relative z-10 text-[9px] font-mono font-bold text-slate-500 opacity-60">
-                  #{slotIndex + 1}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Selection / Hover Indicator */}
+        {/* Selection Glowing Outline */}
         {isSelected && (
-          <div className="absolute inset-0 border-2 border-emerald-400 rounded-[4px] pointer-events-none shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+          <div className="absolute -inset-0.5 rounded-xl ring-2 ring-emerald-400 ring-offset-1 ring-offset-transparent shadow-[0_0_12px_rgba(16,185,129,0.7)] pointer-events-none z-30" />
         )}
       </div>
 
-      {/* Delete tag on hover if charm exists */}
+      {/* Quick Remove '✕' Button on Hover or Selection */}
       {charm && onRemove && (
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-toy-pink text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-125 transition-all shadow-md z-30"
-          title="Remove charm"
+          className={`absolute -top-1.5 -right-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-black flex items-center justify-center shadow-md z-40 transition-all ${
+            isSelected
+              ? "opacity-100 scale-100 ring-2 ring-white"
+              : "opacity-0 group-hover:opacity-100 hover:scale-110"
+          }`}
+          title="Remove charm from band"
+          aria-label="Remove charm"
         >
           ✕
         </button>

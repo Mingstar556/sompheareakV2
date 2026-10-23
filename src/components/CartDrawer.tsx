@@ -151,16 +151,20 @@ export const CartDrawer: React.FC = () => {
                     >
                       {/* Thumbnail */}
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                        <Image
-                          src={
-                            item.product
-                              ? item.product.image
-                              : item.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png"
-                          }
-                          alt="item"
-                          fill
-                          className="object-cover"
-                        />
+                        {(() => {
+                          const itemImg = item.product
+                            ? item.product.image
+                            : item.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png";
+                          return (
+                            <Image
+                              src={itemImg}
+                              alt="item"
+                              fill
+                              className="object-cover"
+                              unoptimized={Boolean(itemImg?.startsWith("data:"))}
+                            />
+                          );
+                        })()}
                       </div>
 
                       {/* Info */}

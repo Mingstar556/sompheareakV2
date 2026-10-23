@@ -10,10 +10,13 @@ import { Search, ArrowUpDown, Sparkles, X } from "lucide-react";
 import { sounds } from "@/utils/audio";
 
 export const ProductGrid: React.FC = () => {
-  const { products, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, sortBy, setSortBy, language, t } =
+  const { products, categories, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, sortBy, setSortBy, language, t } =
     useStore();
 
-  const currentCategoryObj = CATEGORIES.find((c) => c.id === selectedCategory) || CATEGORIES[0];
+  const currentCategoryObj =
+    (categories || []).find((c) => c.id === selectedCategory) ||
+    categories?.[0] ||
+    CATEGORIES[0];
 
   const filteredAndSortedProducts = useMemo(() => {
     let list = products.filter((p) => {
@@ -24,7 +27,8 @@ export const ProductGrid: React.FC = () => {
         p.name.toLowerCase().includes(q) ||
         p.nameKh.toLowerCase().includes(q) ||
         p.bio.toLowerCase().includes(q) ||
-        p.cat.toLowerCase().includes(q);
+        p.cat.toLowerCase().includes(q) ||
+        Boolean(p.code && p.code.toLowerCase().includes(q));
       return matchCat && matchSearch;
     });
 
@@ -130,22 +134,35 @@ export const ProductGrid: React.FC = () => {
         </div>
       ) : (
         /* Empty State */
-        <div className="py-16 text-center bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8">
-          <span className="text-4xl">🔍</span>
-          <h3 className="text-lg font-black text-white font-fredoka mt-3">No toys found</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Try adjusting your search keyword or clearing the filters to explore all drops!
+        <div className="py-16 text-center bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8 space-y-3">
+          <span className="text-4xl">🧸</span>
+          <h3 className="text-lg font-black text-white font-fredoka">
+            {products.length === 0 ? "Toy Drops Coming Soon!" : "No toys found"}
+          </h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+            {products.length === 0
+              ? "Our product catalog is currently being refreshed! In the meantime, design your custom Italian modular charm bracelet above."
+              : "Try adjusting your search keyword or clearing the filters to explore all drops!"}
           </p>
-          <button
-            onClick={() => {
-              sounds.playPop();
-              setSelectedCategory("all");
-              setSearchQuery("");
-            }}
-            className="mt-4 px-4 py-2 rounded-xl bg-toy-purple text-white text-xs font-bold shadow-md hover:opacity-90"
-          >
-            Reset Filters
-          </button>
+          {products.length === 0 ? (
+            <a
+              href="#custom-studio"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-xs font-black font-fredoka shadow-toy-green-glow hover:opacity-90 transition-all active:scale-95"
+            >
+              <span>Build Italian Charm Bracelet 💎</span>
+            </a>
+          ) : (
+            <button
+              onClick={() => {
+                sounds.playPop();
+                setSelectedCategory("all");
+                setSearchQuery("");
+              }}
+              className="mt-2 px-4 py-2 rounded-xl bg-toy-purple text-white text-xs font-bold shadow-md hover:opacity-90"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       )}
     </section>

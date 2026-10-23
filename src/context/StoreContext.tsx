@@ -13,10 +13,16 @@ import {
   OrderNotification,
   StorefrontConfig,
   CustomerAccount,
+  Charm,
+  CategoryBox,
+  Category,
 } from "@/types/store";
 import { TRANSLATIONS } from "@/data/translations";
 import { AVAILABLE_VOUCHERS } from "@/data/vouchers";
 import { PRODUCTS } from "@/data/products";
+import { CHARMS, ensureUniqueCharmCodes, generateUniqueCharmCode } from "@/data/charms";
+import { DEFAULT_CATEGORY_BOXES } from "@/data/categoryBoxes";
+import { CATEGORIES } from "@/data/categories";
 import { sounds } from "@/utils/audio";
 import confetti from "canvas-confetti";
 
@@ -78,15 +84,40 @@ interface StoreContextType {
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   resetProducts: () => void;
+  wipeAllProducts: () => void;
+
+  // Italy Modular Charms Management
+  charms: Charm[];
+  addCharm: (charm: Omit<Charm, "id">) => Charm;
+  updateCharm: (id: string, updates: Partial<Charm>) => void;
+  deleteCharm: (id: string) => void;
+  resetCharms: () => void;
+  clearCharms: () => void;
 
   orders: CustomerOrder[];
   saveOrder: (order: CustomerOrder) => void;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  updateOrder: (orderId: string, updates: Partial<CustomerOrder>) => void;
   deleteOrder: (orderId: string) => void;
 
   vouchers: Voucher[];
   addVoucher: (voucher: Voucher) => void;
   deleteVoucher: (code: string) => void;
+
+  // Category Bento Boxes Management
+  categoryBoxes: CategoryBox[];
+  addCategoryBox: (box: Omit<CategoryBox, "id">) => CategoryBox;
+  updateCategoryBox: (id: string, updates: Partial<CategoryBox>) => void;
+  deleteCategoryBox: (id: string) => void;
+  resetCategoryBoxes: () => void;
+  reorderCategoryBoxes: (boxes: CategoryBox[]) => void;
+
+  // Product Filter Categories
+  categories: Category[];
+  addCategory: (cat: Omit<Category, "id"> & { id?: string }) => Category;
+  updateCategory: (id: string, updates: Partial<Category>) => void;
+  deleteCategory: (id: string) => void;
+  resetCategories: () => void;
 
   // Real-Time Testing Notifications
   notifications: OrderNotification[];
@@ -136,88 +167,134 @@ const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
   freeDeliveryThreshold: 25.0,
 };
 
-const INITIAL_DEMO_ORDERS: CustomerOrder[] = [
-  {
-    id: "ord-1001",
-    orderRef: "SR-8491",
-    customerName: "Sokha Mean",
-    customerPhone: "012 889 977",
-    telegramHandle: "@sokha_m",
-    province: "Phnom Penh",
-    address: "Street 2004, Sangkat Teuk Thla, Khan Sen Sok",
-    notes: "Please call 10 mins before arrival",
-    paymentMethod: "khqr",
-    items: [
-      {
-        id: "item-1",
-        quantity: 1,
-        product: PRODUCTS[0],
-      },
-      {
-        id: "item-2",
-        quantity: 2,
-        product: PRODUCTS[1],
-      },
-    ],
-    subtotalUsd: 24.3,
-    discountUsd: 1.5,
-    deliveryFeeUsd: 0,
-    totalUsd: 22.8,
-    totalKhr: 93480,
-    pointsEarned: 14,
-    voucherCodeApplied: "TOY15",
-    status: "confirmed",
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-  },
-  {
-    id: "ord-1002",
-    orderRef: "SR-9214",
-    customerName: "Dara Heng",
-    customerPhone: "097 554 123",
-    telegramHandle: "@dara_toylove",
-    province: "Siem Reap",
-    address: "Wat Bo Road, Krong Siem Reap",
-    notes: "Deliver in the afternoon please",
-    paymentMethod: "cod",
-    items: [
-      {
-        id: "item-3",
-        quantity: 1,
-        product: PRODUCTS[2],
-      },
-    ],
-    subtotalUsd: 16.5,
-    discountUsd: 0,
-    deliveryFeeUsd: 1.5,
-    totalUsd: 18.0,
-    totalKhr: 73800,
-    pointsEarned: 10,
-    voucherCodeApplied: null,
-    status: "shipped",
-    createdAt: new Date(Date.now() - 3600000 * 22).toISOString(),
-  },
-];
+const INITIAL_DEMO_ORDERS: CustomerOrder[] = [];
 
-const INITIAL_NOTIFICATIONS: OrderNotification[] = [
-  {
-    id: "notif-1",
-    orderRef: "SR-8491",
-    title: "Order Confirmed: #SR-8491",
-    message: "Order for Sokha Mean confirmed ($22.80). KHQR payment verified.",
-    type: "order_confirmed",
-    read: false,
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-  },
-  {
-    id: "notif-2",
-    orderRef: "SR-9214",
-    title: "Order Shipped: #SR-9214",
-    message: "Dara Heng's order dispatched via express provincial carrier.",
-    type: "order_shipped",
-    read: false,
-    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-  },
-];
+const INITIAL_NOTIFICATIONS: OrderNotification[] = [];
+
+// Compact cart items before writing to localStorage to prevent massive duplicate base64 images
+export const compactCartForStorage = (cartItems: CartItem[]): CartItem[] => {
+  if (!Array.isArray(cartItems)) return [];
+  const seenCharmImages = new Set<string>();
+
+  return cartItems.map((item) => {
+    if (!item.customBracelet?.charms) return item;
+
+    return {
+      ...item,
+      customBracelet: {
+        ...item.customBracelet,
+        charms: item.customBracelet.charms.map((slotItem) => {
+          const c = slotItem.charm;
+          if (!c) return slotItem;
+
+          // If the charm has a heavy inline base64 data URL (>256 chars)
+          const isLargeDataUrl = typeof c.image === "string" && c.image.startsWith("data:") && c.image.length > 256;
+
+          if (isLargeDataUrl) {
+            if (!seenCharmImages.has(c.id)) {
+              seenCharmImages.add(c.id);
+              // Keep first occurrence so custom uploaded charm is preserved
+              return { slot: slotItem.slot, charm: { ...c, plateImage: undefined } };
+            } else {
+              // Reference the charm ID instead of duplicating the huge base64 string 16 times
+              return { slot: slotItem.slot, charm: { ...c, image: `ref:${c.id}`, plateImage: undefined } };
+            }
+          }
+
+          return { slot: slotItem.slot, charm: { ...c, plateImage: undefined } };
+        }),
+      },
+    };
+  });
+};
+
+// Hydrate cart items read from localStorage, resolving ref: charm images
+export const hydrateCartFromStorage = (cartItems: CartItem[], allCharms: Charm[]): CartItem[] => {
+  if (!Array.isArray(cartItems)) return [];
+  const charmMap = new Map<string, Charm>();
+  allCharms.forEach((c) => charmMap.set(c.id, c));
+
+  // Collect unique inline images from the cart itself
+  cartItems.forEach((it) => {
+    if (it.customBracelet?.charms) {
+      it.customBracelet.charms.forEach((slotItem) => {
+        if (slotItem.charm?.image && !slotItem.charm.image.startsWith("ref:")) {
+          charmMap.set(slotItem.charm.id, slotItem.charm);
+        }
+      });
+    }
+  });
+
+  return cartItems.map((item) => {
+    if (!item.customBracelet?.charms) return item;
+    return {
+      ...item,
+      customBracelet: {
+        ...item.customBracelet,
+        charms: item.customBracelet.charms.map((slotItem) => {
+          if (slotItem.charm?.image?.startsWith("ref:")) {
+            const resolved = charmMap.get(slotItem.charm.id);
+            if (resolved) {
+              return {
+                ...slotItem,
+                charm: { ...slotItem.charm, image: resolved.image },
+              };
+            }
+          }
+          return slotItem;
+        }),
+      },
+    };
+  });
+};
+
+// Compact orders before writing to localStorage
+export const compactOrdersForStorage = (orders: CustomerOrder[]): CustomerOrder[] => {
+  if (!Array.isArray(orders)) return [];
+  return orders.map((o) => ({
+    ...o,
+    items: compactCartForStorage(o.items || []),
+  }));
+};
+
+// Hydrate orders read from localStorage
+export const hydrateOrdersFromStorage = (orders: CustomerOrder[], allCharms: Charm[]): CustomerOrder[] => {
+  if (!Array.isArray(orders)) return [];
+  return orders.map((o) => ({
+    ...o,
+    items: hydrateCartFromStorage(o.items || [], allCharms),
+  }));
+};
+
+// Safe localStorage helper to prevent QuotaExceededError from crashing the app
+export const safeSetItem = (key: string, value: string): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    console.warn(`[Storage] Failed writing key "${key}" to localStorage:`, err);
+    try {
+      if (key === "somphea_orders") {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          const compacted = compactOrdersForStorage(parsed.slice(0, 5));
+          localStorage.setItem(key, JSON.stringify(compacted));
+          return true;
+        }
+      }
+      if (key === "somphea_cart") {
+        const parsed = JSON.parse(value);
+        const compacted = compactCartForStorage(parsed);
+        localStorage.setItem(key, JSON.stringify(compacted));
+        return true;
+      }
+    } catch {
+      console.warn(`[Storage] Operating in memory-only mode for "${key}".`);
+    }
+    return false;
+  }
+};
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
@@ -228,8 +305,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(true);
 
   const [products, setProductsState] = useState<Product[]>(PRODUCTS);
+  const [charms, setCharmsState] = useState<Charm[]>(() => ensureUniqueCharmCodes(CHARMS));
   const [orders, setOrdersState] = useState<CustomerOrder[]>(INITIAL_DEMO_ORDERS);
   const [vouchers, setVouchersState] = useState<Voucher[]>(AVAILABLE_VOUCHERS);
+  const [categoryBoxes, setCategoryBoxesState] = useState<CategoryBox[]>(DEFAULT_CATEGORY_BOXES);
+  const [categories, setCategoriesState] = useState<Category[]>(CATEGORIES);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
@@ -293,7 +373,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const savedCart = localStorage.getItem("somphea_cart");
       if (savedCart) {
-        setCart(JSON.parse(savedCart));
+        try {
+          const parsed = JSON.parse(savedCart);
+          setCart(hydrateCartFromStorage(parsed, CHARMS));
+        } catch {
+          setCart([]);
+        }
       }
 
       const savedPts = localStorage.getItem("somphea_points");
@@ -325,17 +410,49 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetch("/api/products")
           .then((r) => r.json())
           .then((d) => {
-            if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+            if (d.success && Array.isArray(d.data)) {
               setProductsState(d.data);
             }
           })
           .catch(() => {});
 
+        // Fetch Italy Modular Charms with guaranteed unique codes
+        const savedCharms = localStorage.getItem("somphea_charms");
+        if (savedCharms) {
+          try {
+            const parsed = JSON.parse(savedCharms);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const unique = ensureUniqueCharmCodes(parsed);
+              setCharmsState(unique);
+              safeSetItem("somphea_charms", JSON.stringify(unique));
+            }
+          } catch {}
+        }
+        fetch("/api/charms")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+              const unique = ensureUniqueCharmCodes(d.data);
+              setCharmsState(unique);
+              safeSetItem("somphea_charms", JSON.stringify(unique));
+            }
+          })
+          .catch(() => {});
+
+        // Orders Hydration
+        const savedOrders = localStorage.getItem("somphea_orders");
+        if (savedOrders) {
+          try {
+            const parsed = JSON.parse(savedOrders);
+            setOrdersState(hydrateOrdersFromStorage(parsed, CHARMS));
+          } catch {}
+        }
+
         fetch("/api/orders")
           .then((r) => r.json())
           .then((d) => {
             if (d.success && Array.isArray(d.data)) {
-              setOrdersState(d.data);
+              setOrdersState(hydrateOrdersFromStorage(d.data, CHARMS));
             }
           })
           .catch(() => {});
@@ -366,6 +483,42 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
           })
           .catch(() => {});
+
+        const savedBoxes = localStorage.getItem("somphea_category_boxes");
+        if (savedBoxes) {
+          try {
+            const parsed = JSON.parse(savedBoxes);
+            if (Array.isArray(parsed) && parsed.length > 0) setCategoryBoxesState(parsed);
+          } catch {}
+        }
+
+        fetch("/api/category-boxes")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.categoryBoxes)) {
+              setCategoryBoxesState(d.categoryBoxes);
+              safeSetItem("somphea_category_boxes", JSON.stringify(d.categoryBoxes));
+            }
+          })
+          .catch(() => {});
+
+        const savedCategories = localStorage.getItem("somphea_categories");
+        if (savedCategories) {
+          try {
+            const parsed = JSON.parse(savedCategories);
+            if (Array.isArray(parsed) && parsed.length > 0) setCategoriesState(parsed);
+          } catch {}
+        }
+
+        fetch("/api/categories")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && Array.isArray(d.categories) && d.categories.length > 0) {
+              setCategoriesState(d.categories);
+              safeSetItem("somphea_categories", JSON.stringify(d.categories));
+            }
+          })
+          .catch(() => {});
       }
     } catch {
       // ignore SSR or storage exceptions
@@ -374,13 +527,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setCurrency = useCallback((c: Currency) => {
     setCurrencyState(c);
-    localStorage.setItem("somphea_currency", c);
+    safeSetItem("somphea_currency", c);
   }, []);
 
   const toggleCurrency = useCallback(() => {
     setCurrencyState((prev) => {
       const next = prev === "USD" ? "KHR" : "USD";
-      localStorage.setItem("somphea_currency", next);
+      safeSetItem("somphea_currency", next);
       sounds.playPop();
       return next;
     });
@@ -388,13 +541,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setLanguage = useCallback((l: Language) => {
     setLanguageState(l);
-    localStorage.setItem("somphea_lang", l);
+    safeSetItem("somphea_lang", l);
   }, []);
 
   const toggleLanguage = useCallback(() => {
     setLanguageState((prev) => {
       const next = prev === "en" ? "km" : "en";
-      localStorage.setItem("somphea_lang", next);
+      safeSetItem("somphea_lang", next);
       sounds.playPop();
       return next;
     });
@@ -403,7 +556,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toggleTheme = useCallback(() => {
     setThemeModeState((prev) => {
       const next = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("somphea_theme", next);
+      safeSetItem("somphea_theme", next);
       if (next === "dark") {
         document.documentElement.classList.add("dark");
       } else {
@@ -418,7 +571,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSoundEnabledState((prev) => {
       const next = !prev;
       sounds.setEnabled(next);
-      localStorage.setItem("somphea_sound", String(next));
+      safeSetItem("somphea_sound", String(next));
       if (next) sounds.playPop();
       return next;
     });
@@ -437,7 +590,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         updated = [...prev, { id: `cart-${product.id}-${Date.now()}`, product, quantity }];
       }
-      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      safeSetItem("somphea_cart", JSON.stringify(compactCartForStorage(updated)));
       return updated;
     });
     setCartDrawerOpen(true);
@@ -461,7 +614,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setCart((prev) => {
       const updated = [...prev, cartItem];
-      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      safeSetItem("somphea_cart", JSON.stringify(compactCartForStorage(updated)));
       return updated;
     });
     setCartDrawerOpen(true);
@@ -471,7 +624,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     sounds.playPop();
     setCart((prev) => {
       const updated = prev.filter((item) => item.id !== itemId);
-      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      safeSetItem("somphea_cart", JSON.stringify(compactCartForStorage(updated)));
       return updated;
     });
   }, []);
@@ -488,7 +641,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return item;
         })
         .filter((item): item is CartItem => item !== null);
-      localStorage.setItem("somphea_cart", JSON.stringify(updated));
+      safeSetItem("somphea_cart", JSON.stringify(compactCartForStorage(updated)));
       return updated;
     });
   }, []);
@@ -504,7 +657,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addPoints = useCallback((pt: number) => {
     setUserPoints((prev) => {
       const next = prev + pt;
-      localStorage.setItem("somphea_points", String(next));
+      safeSetItem("somphea_points", String(next));
       return next;
     });
   }, []);
@@ -514,7 +667,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       sounds.playFanfare();
       setUserPoints((prev) => {
         const next = prev - 25;
-        localStorage.setItem("somphea_points", String(next));
+        safeSetItem("somphea_points", String(next));
         return next;
       });
       const voucher: Voucher = {
@@ -614,7 +767,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setProductsState((prev) => {
       const updated = [product, ...prev];
-      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      safeSetItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
 
@@ -631,7 +784,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
     setProductsState((prev) => {
       const updated = prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
-      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      safeSetItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
 
@@ -646,7 +799,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteProduct = useCallback((id: string) => {
     setProductsState((prev) => {
       const updated = prev.filter((p) => p.id !== id);
-      localStorage.setItem("somphea_products", JSON.stringify(updated));
+      safeSetItem("somphea_products", JSON.stringify(updated));
       return updated;
     });
 
@@ -655,7 +808,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const resetProducts = useCallback(() => {
     setProductsState(PRODUCTS);
-    localStorage.setItem("somphea_products", JSON.stringify(PRODUCTS));
+    safeSetItem("somphea_products", JSON.stringify(PRODUCTS));
     fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -663,11 +816,98 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }).catch(() => {});
   }, []);
 
+  const wipeAllProducts = useCallback(() => {
+    setProductsState([]);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("somphea_products");
+      } catch {}
+    }
+    fetch("/api/products", {
+      method: "DELETE",
+    }).catch(() => {});
+  }, []);
+
+  // Italy Modular Charms Management Callbacks with guaranteed non-duplicating codes
+  const addCharm = useCallback((newCharm: Omit<Charm, "id">): Charm => {
+    const id = `charm-${Date.now()}`;
+    const code = generateUniqueCharmCode(newCharm, charms);
+    const charm: Charm = { ...newCharm, id, code };
+
+    setCharmsState((prev) => {
+      const updated = ensureUniqueCharmCodes([charm, ...prev]);
+      safeSetItem("somphea_charms", JSON.stringify(updated));
+      return updated;
+    });
+
+    fetch("/api/charms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(charm),
+    }).catch(() => {});
+
+    return charm;
+  }, [charms]);
+
+  const updateCharm = useCallback((id: string, updates: Partial<Charm>) => {
+    setCharmsState((prev) => {
+      const target = prev.find((c) => c.id === id);
+      if (!target) return prev;
+      let newCode = updates.code !== undefined ? updates.code : target.code;
+      if (newCode) {
+        newCode = generateUniqueCharmCode({ ...target, ...updates, id, code: newCode }, prev);
+      }
+      const updated = prev.map((c) =>
+        c.id === id ? { ...c, ...updates, ...(newCode ? { code: newCode } : {}) } : c
+      );
+      const guaranteed = ensureUniqueCharmCodes(updated);
+      safeSetItem("somphea_charms", JSON.stringify(guaranteed));
+      return guaranteed;
+    });
+
+    fetch(`/api/charms/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
+  }, []);
+
+  const deleteCharm = useCallback((id: string) => {
+    setCharmsState((prev) => {
+      const updated = prev.filter((c) => c.id !== id);
+      safeSetItem("somphea_charms", JSON.stringify(updated));
+      return updated;
+    });
+
+    fetch(`/api/charms/${id}`, { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  const resetCharms = useCallback(() => {
+    const unique = ensureUniqueCharmCodes(CHARMS);
+    setCharmsState(unique);
+    safeSetItem("somphea_charms", JSON.stringify(unique));
+    fetch("/api/charms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
+    }).catch(() => {});
+  }, []);
+
+  const clearCharms = useCallback(() => {
+    setCharmsState([]);
+    safeSetItem("somphea_charms", JSON.stringify([]));
+    fetch("/api/charms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "clear" }),
+    }).catch(() => {});
+  }, []);
+
   // Customer Orders Management with Testing Notifications
   const saveOrder = useCallback((order: CustomerOrder) => {
     setOrdersState((prev) => {
       const updated = [order, ...prev];
-      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      safeSetItem("somphea_orders", JSON.stringify(compactOrdersForStorage(updated)));
       return updated;
     });
 
@@ -703,7 +943,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         return o;
       });
-      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      safeSetItem("somphea_orders", JSON.stringify(compactOrdersForStorage(updated)));
       return updated;
     });
 
@@ -749,10 +989,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteOrder = useCallback((orderId: string) => {
     setOrdersState((prev) => {
       const updated = prev.filter((o) => o.id !== orderId);
-      localStorage.setItem("somphea_orders", JSON.stringify(updated));
+      safeSetItem("somphea_orders", JSON.stringify(compactOrdersForStorage(updated)));
       return updated;
     });
     fetch(`/api/orders/${orderId}`, { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  const updateOrder = useCallback((orderId: string, updates: Partial<CustomerOrder>) => {
+    setOrdersState((prev) => {
+      const updated = prev.map((o) => (o.id === orderId ? { ...o, ...updates } : o));
+      safeSetItem("somphea_orders", JSON.stringify(compactOrdersForStorage(updated)));
+      return updated;
+    });
+
+    setSelectedReceiptOrder((prev) => (prev && prev.id === orderId ? { ...prev, ...updates } : prev));
+
+    fetch(`/api/orders/${orderId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
   }, []);
 
   // Notifications helpers
@@ -780,7 +1036,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addVoucher = useCallback((voucher: Voucher) => {
     setVouchersState((prev) => {
       const updated = [voucher, ...prev.filter((v) => v.code !== voucher.code)];
-      localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
+      safeSetItem("somphea_vouchers", JSON.stringify(updated));
       return updated;
     });
     fetch("/api/vouchers", {
@@ -793,7 +1049,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteVoucher = useCallback((code: string) => {
     setVouchersState((prev) => {
       const updated = prev.filter((v) => v.code !== code);
-      localStorage.setItem("somphea_vouchers", JSON.stringify(updated));
+      safeSetItem("somphea_vouchers", JSON.stringify(updated));
       return updated;
     });
     fetch(`/api/vouchers?code=${encodeURIComponent(code)}`, { method: "DELETE" }).catch(() => {});
@@ -803,13 +1059,145 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateStorefrontConfig = useCallback((updates: Partial<StorefrontConfig>) => {
     setStorefrontConfig((prev) => {
       const next = { ...prev, ...updates };
-      localStorage.setItem("somphea_storefront_config", JSON.stringify(next));
+      safeSetItem("somphea_storefront_config", JSON.stringify(next));
       return next;
     });
     fetch("/api/store-config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
+    }).catch(() => {});
+  }, []);
+
+  // Category Bento Boxes Operations
+  const addCategoryBox = useCallback((newBox: Omit<CategoryBox, "id">): CategoryBox => {
+    const id = `box-${Date.now()}`;
+    const box: CategoryBox = { ...newBox, id };
+    setCategoryBoxesState((prev) => {
+      const updated = [...prev, box];
+      safeSetItem("somphea_category_boxes", JSON.stringify(updated));
+      return updated;
+    });
+    fetch("/api/category-boxes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(box),
+    }).catch(() => {});
+    return box;
+  }, []);
+
+  const updateCategoryBox = useCallback((id: string, updates: Partial<CategoryBox>) => {
+    setCategoryBoxesState((prev) => {
+      const updated = prev.map((b) => (b.id === id ? { ...b, ...updates } : b));
+      safeSetItem("somphea_category_boxes", JSON.stringify(updated));
+      return updated;
+    });
+    fetch(`/api/category-boxes/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
+  }, []);
+
+  const deleteCategoryBox = useCallback((id: string) => {
+    setCategoryBoxesState((prev) => {
+      const updated = prev.filter((b) => b.id !== id);
+      safeSetItem("somphea_category_boxes", JSON.stringify(updated));
+      return updated;
+    });
+    fetch(`/api/category-boxes/${id}`, { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  const resetCategoryBoxes = useCallback(() => {
+    setCategoryBoxesState(DEFAULT_CATEGORY_BOXES);
+    safeSetItem("somphea_category_boxes", JSON.stringify(DEFAULT_CATEGORY_BOXES));
+    fetch("/api/category-boxes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
+    }).catch(() => {});
+  }, []);
+
+  const reorderCategoryBoxes = useCallback((boxes: CategoryBox[]) => {
+    setCategoryBoxesState(boxes);
+    safeSetItem("somphea_category_boxes", JSON.stringify(boxes));
+    fetch("/api/category-boxes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reorder", boxes }),
+    }).catch(() => {});
+  }, []);
+
+  // Product Filter Categories Operations
+  const addCategory = useCallback((newCat: Omit<Category, "id"> & { id?: string }): Category => {
+    const slug = (newCat.id && newCat.id.trim())
+      ? newCat.id.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+      : newCat.name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || `cat-${Date.now()}`;
+
+    const category: Category = {
+      id: slug,
+      name: newCat.name.trim(),
+      kh: newCat.kh?.trim() || newCat.name.trim(),
+      en: newCat.en?.trim() || newCat.name.trim(),
+      icon: newCat.icon?.trim() || "🏷️",
+      grad: newCat.grad?.trim() || "from-emerald-500 to-teal-600",
+      sort_order: typeof newCat.sort_order === "number" ? newCat.sort_order : categories.length,
+      description: newCat.description?.trim() || "",
+    };
+
+    setCategoriesState((prev) => {
+      const existingIdx = prev.findIndex((c) => c.id === slug);
+      let updated: Category[];
+      if (existingIdx !== -1) {
+        updated = prev.map((c, i) => (i === existingIdx ? category : c));
+      } else {
+        updated = [...prev, category];
+      }
+      safeSetItem("somphea_categories", JSON.stringify(updated));
+      return updated;
+    });
+
+    fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category),
+    }).catch(() => {});
+
+    return category;
+  }, [categories.length]);
+
+  const updateCategory = useCallback((id: string, updates: Partial<Category>) => {
+    setCategoriesState((prev) => {
+      const updated = prev.map((c) => (c.id === id ? { ...c, ...updates, id } : c));
+      safeSetItem("somphea_categories", JSON.stringify(updated));
+      return updated;
+    });
+
+    fetch(`/api/categories/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    }).catch(() => {});
+  }, []);
+
+  const deleteCategory = useCallback((id: string) => {
+    if (id === "all") return;
+    setCategoriesState((prev) => {
+      const updated = prev.filter((c) => c.id !== id);
+      safeSetItem("somphea_categories", JSON.stringify(updated));
+      return updated;
+    });
+
+    fetch(`/api/categories/${id}`, { method: "DELETE" }).catch(() => {});
+  }, []);
+
+  const resetCategories = useCallback(() => {
+    setCategoriesState(CATEGORIES);
+    safeSetItem("somphea_categories", JSON.stringify(CATEGORIES));
+    fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
     }).catch(() => {});
   }, []);
 
@@ -827,7 +1215,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setCustomerUserState(account);
     if (account.rememberMe) {
-      localStorage.setItem("somphea_customer_account", JSON.stringify(account));
+      safeSetItem("somphea_customer_account", JSON.stringify(account));
     } else {
       localStorage.removeItem("somphea_customer_account");
     }
@@ -850,7 +1238,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!prev) return null;
       const updated = { ...prev, ...updates };
       if (updated.rememberMe) {
-        localStorage.setItem("somphea_customer_account", JSON.stringify(updated));
+        safeSetItem("somphea_customer_account", JSON.stringify(updated));
       }
       return updated;
     });
@@ -908,13 +1296,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateProduct,
         deleteProduct,
         resetProducts,
+        wipeAllProducts,
+        charms,
+        addCharm,
+        updateCharm,
+        deleteCharm,
+        resetCharms,
+        clearCharms,
         orders,
         saveOrder,
         updateOrderStatus,
+        updateOrder,
         deleteOrder,
         vouchers,
         addVoucher,
         deleteVoucher,
+        categoryBoxes,
+        addCategoryBox,
+        updateCategoryBox,
+        deleteCategoryBox,
+        resetCategoryBoxes,
+        reorderCategoryBoxes,
+        categories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        resetCategories,
         notifications,
         unreadNotificationCount,
         markNotificationRead,

@@ -73,3 +73,39 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mobile Touch & iOS / Android Specific Optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent unwanted automatic zoom in iOS Safari on input focus */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="email"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe Area Inset Support for iPhone notch & dynamic island & bottom home bar */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+.safe-bottom {
+  bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Smooth mobile momentum scrolling */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+

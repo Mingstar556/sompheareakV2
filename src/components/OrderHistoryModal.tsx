@@ -212,39 +212,100 @@ export const OrderHistoryModal: React.FC = () => {
                 return (
                   <div
                     key={ord.id}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-emerald-500/50"
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3 transition-all hover:border-emerald-500/50"
                   >
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-black px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white">
-                          #{ord.orderRef}
-                        </span>
-                        {getStatusBadge(ord.status)}
+                    {/* Top Order Summary Row */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-black px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white">
+                            #{ord.orderRef}
+                          </span>
+                          {getStatusBadge(ord.status)}
+                        </div>
+                        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          <span>Placed on {new Date(ord.createdAt).toLocaleDateString()}</span> ·{" "}
+                          <span>{itemCount} {itemCount === 1 ? "item" : "items"}</span>
+                        </div>
                       </div>
 
-                      <div className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                        <span>{itemCount} {itemCount === 1 ? "toy" : "toys"}</span> ·{" "}
-                        <span className="text-slate-400">{new Date(ord.createdAt).toLocaleDateString()}</span>
-                      </div>
-
-                      <div className="text-sm font-black font-fredoka text-amber-600 dark:text-toy-yellow">
-                        ${ord.totalUsd.toFixed(2)} USD{" "}
-                        <span className="text-[11px] text-slate-400 font-normal">
-                          ({ord.totalKhr.toLocaleString()} KHR)
-                        </span>
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <div className="text-right">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Total</span>
+                          <div className="text-base font-black font-fredoka text-amber-600 dark:text-toy-yellow">
+                            ${ord.totalUsd.toFixed(2)} USD
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            sounds.playFanfare();
+                            setSelectedReceiptOrder(ord);
+                          }}
+                          className="py-2 px-3.5 rounded-xl font-black text-xs font-fredoka text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 flex-shrink-0"
+                        >
+                          <Receipt className="w-3.5 h-3.5" />
+                          <span>View Receipt 🧾</span>
+                        </button>
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        sounds.playFanfare();
-                        setSelectedReceiptOrder(ord);
-                      }}
-                      className="w-full sm:w-auto py-2 px-4 rounded-xl font-black text-xs font-fredoka text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 flex-shrink-0"
-                    >
-                      <Receipt className="w-3.5 h-3.5" />
-                      <span>View Receipt 🧾</span>
-                    </button>
+                    {/* Products in this Order (Picture beside Description) */}
+                    <div className="space-y-2 pt-1">
+                      {ord.items.map((item, itIdx) => {
+                        const itemImg = item.product
+                          ? item.product.image
+                          : item.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png";
+                        const itemPrice = item.product ? item.product.price : item.customBracelet?.unitPrice || 0;
+                        const title = item.product
+                          ? item.product.name
+                          : `Custom Italian Bracelet (${item.customBracelet?.sizeLinks} Links)`;
+                        const desc = item.product?.bio
+                          ? item.product.bio
+                          : item.customBracelet
+                          ? `Custom 9mm modular charm bracelet in ${item.customBracelet.finish.toUpperCase()} Inox (${item.customBracelet.charms.length} charms).`
+                          : "";
+
+                        return (
+                          <div
+                            key={itIdx}
+                            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 flex items-start gap-3 text-xs shadow-2xs"
+                          >
+                            {/* Product Picture */}
+                            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center p-1">
+                              <Image
+                                src={itemImg}
+                                alt={title}
+                                fill
+                                className="object-contain p-0.5"
+                                unoptimized={Boolean(itemImg?.startsWith("data:"))}
+                              />
+                            </div>
+
+                            {/* Description & Details beside Picture */}
+                            <div className="flex-1 min-w-0 space-y-0.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <h5 className="font-bold text-slate-900 dark:text-white truncate font-fredoka text-xs sm:text-sm">
+                                  {title}
+                                </h5>
+                                <span className="font-bold text-slate-900 dark:text-white font-mono text-xs flex-shrink-0">
+                                  ${(itemPrice * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+
+                              {desc && (
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 leading-relaxed">
+                                  {desc}
+                                </p>
+                              )}
+
+                              <div className="text-[10px] text-slate-400 font-medium">
+                                Qty: {item.quantity} × ${itemPrice.toFixed(2)} each
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

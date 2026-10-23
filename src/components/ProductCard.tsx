@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Product } from "@/types/store";
 import { useStore } from "@/context/StoreContext";
 import { sounds } from "@/utils/audio";
 import { formatPrice, formatDiscountPrice } from "@/utils/currency";
 import { motion } from "framer-motion";
-import { ShoppingCart, Eye, Box, Sparkles, Star, Edit3 } from "lucide-react";
+import { ShoppingCart, Eye, Box, Sparkles, Star, ChevronLeft, ChevronRight, Images } from "lucide-react";
 import Image from "next/image";
 
 interface ProductCardProps {
@@ -17,15 +17,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const {
     addToCart,
     setQuickViewProduct,
-    setViewer3DProduct,
     currency,
-    t,
     language,
-    isLiveEditMode,
-    setEditingDirectProduct,
+    t,
   } = useStore();
-
   const prices = formatDiscountPrice(product.price, product.discount, currency);
+
+  const productImages =
+    product.images && product.images.length > 0 ? product.images : [product.image];
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    sounds.playPop();
+    setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : productImages.length - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    sounds.playPop();
+    setActiveImageIdx((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
+  };
 
   const rarityColors = {
     Common: "bg-slate-700/80 text-slate-200 border-slate-600",
@@ -76,52 +88,78 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
       </div>
 
-      {/* 3D View / Spin Shortcut Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          sounds.playPop();
-          setViewer3DProduct(product);
-        }}
-        className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-black/60 hover:bg-emerald-500 text-white hover:text-slate-950 backdrop-blur-md flex items-center justify-center border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-md"
-        title={product.cat === "bracelet" ? "View Empty Modular Inox Band (3D)" : "Interactive 3D Spin"}
-      >
-        <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
-      </button>
-
-      {/* Admin Direct Live Edit Button */}
-      {isLiveEditMode && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            sounds.playPop();
-            setEditingDirectProduct(product);
-          }}
-          className="absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-xs shadow-2xl flex items-center gap-1 border-2 border-slate-950 hover:scale-105 active:scale-95 transition-all select-none animate-bounce"
-          title="Direct Edit Product Live on Storefront"
-        >
-          <Edit3 className="w-3 h-3" />
-          <span>Edit</span>
-        </button>
-      )}
-
-      {/* Product Image Thumbnail */}
+      {/* Product Image Thumbnail with Left/Right Sideway Gallery Navigation */}
       <div
         onClick={() => {
           sounds.playPop();
           setQuickViewProduct(product);
         }}
-        className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950/50 cursor-pointer mb-2 sm:mb-3 border border-slate-200/60 dark:border-transparent"
+        className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950/50 cursor-pointer mb-2 sm:mb-3 border border-slate-200/60 dark:border-transparent group/img select-none"
       >
         <Image
-          src={product.image}
-          alt={product.name}
+          src={productImages[activeImageIdx] || product.image}
+          alt={`${product.name} photo ${activeImageIdx + 1}`}
           fill
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+          className="object-cover group-hover:scale-105 transition-all duration-300 ease-out"
+          unoptimized={Boolean(productImages[activeImageIdx]?.startsWith("data:"))}
         />
+
+        {/* Multiple Photos Count Badge */}
+        {productImages.length > 1 && (
+          <div className="absolute bottom-2.5 right-2.5 z-10 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1 shadow-sm">
+            <Images className="w-3 h-3 text-emerald-400" />
+            <span>
+              {activeImageIdx + 1}/{productImages.length}
+            </span>
+          </div>
+        )}
+
+        {/* Left / Right Navigation Buttons (Side-way scroll) */}
+        {productImages.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={handlePrevImage}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center opacity-85 sm:opacity-0 group-hover/img:opacity-100 transition-opacity border border-slate-200 dark:border-slate-700"
+              title="Previous photo (Scroll left)"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextImage}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center opacity-85 sm:opacity-0 group-hover/img:opacity-100 transition-opacity border border-slate-200 dark:border-slate-700"
+              title="Next photo (Scroll right)"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            {/* Dot Pagination indicators */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/40 backdrop-blur-xs">
+              {productImages.map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sounds.playPop();
+                    setActiveImageIdx(dotIdx);
+                  }}
+                  className={`h-1.5 rounded-full transition-all ${
+                    dotIdx === activeImageIdx
+                      ? "bg-white w-3.5 scale-105"
+                      : "bg-white/50 hover:bg-white/80 w-1.5"
+                  }`}
+                  title={`View photo ${dotIdx + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {/* Hover overlay hint */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none">
           <span className="px-2.5 py-1 rounded-full bg-white/95 text-slate-900 text-[10px] sm:text-xs font-black flex items-center gap-1 shadow-lg">
             <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600" />
             <span>{t("quickView")}</span>
@@ -132,11 +170,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Details */}
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          {/* Star Rating & Points Tag */}
+          {/* Star Rating & Points Tag & Product Code */}
           <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1">
-            <div className="flex items-center gap-0.5 sm:gap-1 text-amber-500 dark:text-toy-yellow font-bold">
-              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 dark:fill-toy-yellow" />
-              <span>{product.rating || 4.9}</span>
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5 sm:gap-1 text-amber-500 dark:text-toy-yellow font-bold">
+                <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 dark:fill-toy-yellow" />
+                <span>{product.rating || 4.9}</span>
+              </div>
+              {product.code && (
+                <span className="font-mono text-[9px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                  {product.code}
+                </span>
+              )}
             </div>
             <span className="text-[9px] sm:text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700/40">
               +{product.pt} pt
@@ -152,19 +197,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           >
             {language === "km" ? product.nameKh : product.name}
           </h3>
-          {isLiveEditMode && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                sounds.playPop();
-                setEditingDirectProduct(product);
-              }}
-              className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-400 underline decoration-dashed mt-0.5"
-            >
-              <Edit3 className="w-3 h-3" />
-              <span>Edit Details</span>
-            </button>
-          )}
           <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
             {language === "km" ? product.bioKh : product.bio}
           </p>
@@ -184,18 +216,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-            {/* 3D view button */}
-            <button
-              onClick={() => {
-                sounds.playPop();
-                setViewer3DProduct(product);
-              }}
-              className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-slate-300 dark:border-slate-700 hover:border-emerald-500 transition-all active:scale-95"
-              title={product.cat === "bracelet" ? "View Empty Band (3D)" : "3D Inspection"}
-            >
-              <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
-
             {/* Add to Cart button */}
             <button
               onClick={() => addToCart(product, 1)}

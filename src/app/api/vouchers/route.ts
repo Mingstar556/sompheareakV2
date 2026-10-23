@@ -4,7 +4,7 @@ import { Voucher } from "@/types/store";
 
 export async function GET() {
   try {
-    const vouchers = getVouchers();
+    const vouchers = await getVouchers();
     return NextResponse.json({ success: true, data: vouchers, count: vouchers.length });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to fetch vouchers" }, { status: 500 });
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       colorGrad: body.colorGrad || "from-emerald-500 to-teal-700",
     };
 
-    const saved = addVoucher(voucher);
+    const saved = await addVoucher(voucher);
     return NextResponse.json({ success: true, message: "Voucher created", data: saved }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to create voucher" }, { status: 500 });
@@ -45,7 +45,7 @@ export async function DELETE(request: Request) {
     if (!code) {
       return NextResponse.json({ success: false, error: "Code query param required" }, { status: 400 });
     }
-    const ok = deleteVoucher(code);
+    const ok = await deleteVoucher(code);
     return NextResponse.json({ success: ok, message: ok ? "Voucher deleted" : "Voucher not found" });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to delete voucher" }, { status: 500 });

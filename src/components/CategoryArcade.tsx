@@ -1,19 +1,20 @@
 "use client";
 
 import React from "react";
-import { CATEGORIES } from "@/data/categories";
 import { useStore } from "@/context/StoreContext";
 import { sounds } from "@/utils/audio";
-import { PRODUCTS } from "@/data/products";
 import { motion } from "framer-motion";
 
 export const CategoryArcade: React.FC = () => {
-  const { products, selectedCategory, setSelectedCategory, language, t } = useStore();
+  const { products, categories, selectedCategory, setSelectedCategory, language, t } = useStore();
 
   const getCategoryCount = (catId: string) => {
     if (catId === "all") return products.length;
+    if (catId === "bracelet") return "Studio 🔗";
     return products.filter((p) => p.cat === catId).length;
   };
+
+  const displayCategories = categories && categories.length > 0 ? categories : [];
 
   return (
     <div className="w-full my-6">
@@ -29,7 +30,7 @@ export const CategoryArcade: React.FC = () => {
 
       {/* Chunky Arcade Category Chips */}
       <div className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 px-1 scrollbar-none">
-        {CATEGORIES.map((cat) => {
+        {displayCategories.map((cat) => {
           const isSelected = selectedCategory === cat.id;
           const count = getCategoryCount(cat.id);
 
@@ -39,6 +40,11 @@ export const CategoryArcade: React.FC = () => {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
+                if (cat.id === "bracelet") {
+                  sounds.playFanfare();
+                  window.location.href = "/italy-bracelet";
+                  return;
+                }
                 sounds.playPop();
                 setSelectedCategory(cat.id);
               }}

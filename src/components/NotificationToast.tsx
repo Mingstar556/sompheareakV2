@@ -43,7 +43,7 @@ export const NotificationToast: React.FC = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <span className="font-black text-xs font-fredoka text-emerald-400 uppercase tracking-wider">
-                Storefront Simulation Alert
+                Order Status Update
               </span>
               <button
                 onClick={dismissNotificationToast}

@@ -2,14 +2,14 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift, Edit3, Zap } from "lucide-react";
+import { Sparkles, ShieldCheck, Truck, MessageCircle, ArrowRight, Gift, Zap } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { ThreeHeroCanvas } from "./ThreeHeroCanvas";
 import { sounds } from "@/utils/audio";
 import styles from "@/styles/ToyEffects.module.css";
 
 export const HeroSection: React.FC = () => {
-  const { t, storefrontConfig, isLiveEditMode, setCopyModalOpen } = useStore();
+  const { t, storefrontConfig } = useStore();
 
   const heroBadge = storefrontConfig?.heroBadge || t("heroBadge");
   const heroTitlePrefix = storefrontConfig?.heroTitlePrefix || t("heroTitlePrefix");
@@ -48,20 +48,6 @@ export const HeroSection: React.FC = () => {
               <Zap className="w-3.5 h-3.5 fill-slate-950" />
               <span>TRENDING TIKTOK 2026</span>
             </span>
-
-            {isLiveEditMode && (
-              <button
-                onClick={() => {
-                  sounds.playPop();
-                  setCopyModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black shadow-xl border-2 border-slate-950 animate-bounce transition-all select-none"
-                title="Direct edit storefront hero headlines & badge"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>Edit Hero Text</span>
-              </button>
-            )}
           </div>
 
           {/* Hero Main Heading */}
@@ -90,7 +76,7 @@ export const HeroSection: React.FC = () => {
             </a>
 
             <a
-              href="#custom-bracelet-studio"
+              href="/italy-bracelet"
               onClick={() => sounds.playPop()}
               className="px-6 py-4 rounded-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border-2 border-amber-400 dark:border-toy-yellow/60 shadow-md font-fredoka text-base tracking-wide flex items-center gap-2 transition-all hover:scale-105 active:scale-95 select-none"
             >

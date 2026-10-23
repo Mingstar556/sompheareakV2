@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, CheckCircle2, ShieldCheck, MapPin, Phone, User, MessageCircle } from "lucide-react";
+import { X, Send, CheckCircle2, ShieldCheck, MapPin, Phone, User, MessageCircle, Receipt } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
+import { CustomerOrder } from "@/types/store";
 import { sounds } from "@/utils/audio";
 import { formatPrice } from "@/utils/currency";
 import {
@@ -24,6 +26,7 @@ export const CheckoutModal: React.FC = () => {
     activeVoucher,
     addPoints,
     saveOrder,
+    setSelectedReceiptOrder,
     t,
   } = useStore();
 
@@ -41,6 +44,7 @@ export const CheckoutModal: React.FC = () => {
     telegramUrl: string;
     totalUsd: number;
     points: number;
+    order: CustomerOrder;
   } | null>(null);
 
   const subtotalUsd = cart.reduce((sum, item) => {
@@ -113,7 +117,7 @@ export const CheckoutModal: React.FC = () => {
     addPoints(totalPoints);
 
     // Save order so Admin Panel can view and fulfill it
-    saveOrder({
+    const newOrder: CustomerOrder = {
       id: `ord-${Date.now()}`,
       orderRef,
       customerName: form.fullName,
@@ -132,13 +136,16 @@ export const CheckoutModal: React.FC = () => {
       voucherCodeApplied: activeVoucher?.code || null,
       status: "pending",
       createdAt: new Date().toISOString(),
-    });
+    };
+
+    saveOrder(newOrder);
 
     setSubmittedOrder({
       orderRef,
       telegramUrl: shareUrl,
       totalUsd,
       points: totalPoints,
+      order: newOrder,
     });
     clearCart();
   };
@@ -333,30 +340,108 @@ export const CheckoutModal: React.FC = () => {
                 {t("orderSuccessNotice")}
               </p>
 
-              <div className="my-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-1.5">
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <div className="my-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-3">
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <span>Total Amount:</span>
-                  <span className="font-bold text-amber-600 dark:text-toy-yellow">
+                  <span className="font-bold text-amber-600 dark:text-toy-yellow text-sm font-fredoka">
                     {formatPrice(submittedOrder.totalUsd, currency)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <span>VIP Points Earned:</span>
                   <span className="font-bold text-emerald-600 dark:text-toy-green">+{submittedOrder.points} pt</span>
                 </div>
+
+                {/* Ordered Items with Picture beside Description */}
+                {submittedOrder.order?.items && (
+                  <div className="space-y-2 pt-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Ordered Products ({submittedOrder.order.items.length}):
+                    </span>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {submittedOrder.order.items.map((it, idx) => {
+                        const img = it.product
+                          ? it.product.image
+                          : it.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png";
+                        const title = it.product
+                          ? it.product.name
+                          : `Custom Bracelet (${it.customBracelet?.sizeLinks} links)`;
+                        const desc = it.product?.bio
+                          ? it.product.bio
+                          : it.customBracelet
+                          ? `Custom 9mm Italian bracelet in ${it.customBracelet.finish.toUpperCase()} Inox.`
+                          : "";
+                        const price = it.product ? it.product.price : it.customBracelet?.unitPrice || 0;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 flex items-start gap-2.5 text-xs shadow-2xs"
+                          >
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center p-0.5">
+                              <Image
+                                src={img}
+                                alt={title}
+                                fill
+                                className="object-contain p-0.5"
+                                unoptimized={Boolean(img?.startsWith("data:"))}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-0.5">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="font-bold text-slate-900 dark:text-white truncate font-fredoka text-xs">
+                                  {title}
+                                </span>
+                                <span className="font-mono text-[11px] font-bold text-slate-900 dark:text-white flex-shrink-0">
+                                  ${(price * it.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                              {desc && (
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                                  {desc}
+                                </p>
+                              )}
+                              <div className="text-[9px] text-slate-400">
+                                Qty: {it.quantity} × ${price.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Telegram Confirmation Action Button */}
-              <a
-                href={submittedOrder.telegramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playFanfare()}
-                className="w-full py-3.5 px-6 rounded-2xl font-black text-white bg-[#229ED9] hover:bg-[#1e8bc0] shadow-lg font-fredoka text-base tracking-wide flex items-center justify-center gap-2 transition-all hover:scale-102 active:scale-95"
-              >
-                <MessageCircle className="w-5 h-5 fill-white" />
-                <span>{t("forwardTelegram")}</span>
-              </a>
+              {/* Action Buttons: View Receipt & Telegram */}
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playFanfare();
+                    if (submittedOrder.order) {
+                      setSelectedReceiptOrder(submittedOrder.order);
+                      setCheckoutModalOpen(false);
+                    }
+                  }}
+                  className="w-full py-3 px-5 rounded-2xl font-black text-slate-900 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-sm font-fredoka text-sm tracking-wide flex items-center justify-center gap-2 transition-all active:scale-95"
+                >
+                  <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>View Official Receipt 🧾</span>
+                </button>
+
+                {/* Telegram Confirmation Action Button */}
+                <a
+                  href={submittedOrder.telegramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => sounds.playFanfare()}
+                  className="w-full py-3.5 px-6 rounded-2xl font-black text-white bg-[#229ED9] hover:bg-[#1e8bc0] shadow-lg font-fredoka text-base tracking-wide flex items-center justify-center gap-2 transition-all hover:scale-102 active:scale-95"
+                >
+                  <MessageCircle className="w-5 h-5 fill-white" />
+                  <span>{t("forwardTelegram")}</span>
+                </a>
+              </div>
 
               <button
                 onClick={handleClose}

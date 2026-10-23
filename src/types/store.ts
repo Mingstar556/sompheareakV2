@@ -16,6 +16,7 @@ export type ToyRarity = 'Common' | 'Rare' | 'Super Rare' | 'Legendary' | 'Limite
 
 export interface Product {
   id: string;
+  code?: string; // Product Code / SKU (e.g. SPK-1001)
   name: string;
   nameKh: string;
   cat: string;
@@ -24,6 +25,7 @@ export interface Product {
   stock: number;
   pt: number; // Reward points earned
   image: string;
+  images?: string[]; // Multiple photos for left/right carousel gallery
   bio: string;
   bioKh: string;
   rarity?: ToyRarity;
@@ -39,13 +41,15 @@ export interface Product {
 
 export interface Charm {
   id: string;
+  code?: string; // Very short unique charm code e.g. "C01", "GF1", "CAT"
   name: string;
   nameKh: string;
-  category: 'emblem' | 'letter' | 'stone' | 'cute' | 'anime';
+  category: 'emblem' | 'letter' | 'stone' | 'cute' | 'anime' | string;
   price: number;
   image: string;
   plateImage?: string;
   isPopular?: boolean;
+  description?: string;
 }
 
 export interface CustomBraceletLink {
@@ -149,5 +153,20 @@ export interface StorefrontConfig {
   heroSubtitle: string;
   freeDeliveryThreshold: number;
 }
+
+export interface CategoryBox {
+  id: string;
+  title: string;
+  titleKh?: string;
+  subtitle?: string;
+  image: string;
+  actionType: "link" | "category";
+  actionValue: string;
+  span: "full" | "half";
+  badge?: string;
+  order: number;
+  active: boolean;
+}
+
 
 

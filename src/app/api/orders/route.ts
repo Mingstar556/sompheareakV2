@@ -4,7 +4,7 @@ import { CustomerOrder } from "@/types/store";
 
 export async function GET() {
   try {
-    const orders = getOrders();
+    const orders = await getOrders();
     return NextResponse.json({ success: true, data: orders, count: orders.length });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to fetch orders" }, { status: 500 });
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       createdAt: body.createdAt || new Date().toISOString(),
     };
 
-    const result = createOrder(order);
+    const result = await createOrder(order);
 
     return NextResponse.json(
       {

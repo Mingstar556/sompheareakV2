@@ -46,8 +46,8 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: "Toys", href: "/#toy-catalog", icon: "🧸" },
-    { label: "Italy Charms", href: "/#custom-bracelet-studio", icon: "🔗" },
+    { label: "Toys Catalog", href: "/#toy-catalog", icon: "🧸" },
+    { label: "Italy Bracelet", href: "/italy-bracelet", icon: "🔗" },
     { label: "Voucher Hub", href: "/#voucher-hub", icon: "🎟️" },
     { label: "Cart & Checkout", href: "/cart", icon: "🛒" },
   ];
@@ -55,19 +55,24 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
-        {/* Brand Logo - Click to Refresh */}
+        {/* Brand Logo - Click to Refresh or Return Home */}
         <a
-          href="#"
+          href="/"
           onClick={(e) => {
             e.preventDefault();
             sounds.playFanfare();
-            window.location.reload();
+            if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
+              window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+              window.location.reload();
+            } else {
+              window.location.href = "/";
+            }
           }}
-          title="Click Logo to Refresh Storefront"
-          className="flex items-center gap-3 group select-none flex-shrink-0 cursor-pointer"
+          title="Somphea Reak Home (Click to Return or Refresh)"
+          className="flex items-center gap-2 sm:gap-3 group select-none shrink-0 cursor-pointer"
         >
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-toy-green-glow group-hover:scale-105 active:scale-95 transition-transform duration-300">
-            <div className="w-full h-full rounded-2xl overflow-hidden relative bg-slate-900">
+          <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-toy-green-glow group-hover:scale-105 active:scale-95 transition-transform duration-300">
+            <div className="w-full h-full rounded-xl sm:rounded-2xl overflow-hidden relative bg-slate-900">
               <Image
                 src="/assets/logo.jpg"
                 alt="Somphea Reak Logo"
@@ -77,19 +82,19 @@ export const Navbar: React.FC = () => {
               />
             </div>
             {/* Sparkle badge */}
-            <span className="absolute -bottom-1 -right-1 text-xs animate-bounce">✨</span>
+            <span className="absolute -bottom-1 -right-1 text-xs animate-bounce hidden sm:inline">✨</span>
           </div>
 
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-fredoka tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className="text-base sm:text-2xl font-black font-fredoka tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                 SOMPHEA REAK
               </span>
-              <span className="px-2 py-0.5 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+              <span className="px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-md sm:rounded-lg bg-emerald-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider shadow-sm">
                 V2
               </span>
             </div>
-            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wide uppercase">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wide uppercase line-clamp-1">
               សម្ភារៈ • Toy & Charm Studio
             </p>
           </div>
@@ -111,7 +116,7 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Right Actions & Toolbars */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* VIP Rewards Club Pill */}
           <button
             onClick={() => {
@@ -128,27 +133,27 @@ export const Navbar: React.FC = () => {
           {/* Currency Switcher ($ / ៛) */}
           <button
             onClick={toggleCurrency}
-            className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1 shadow-sm"
+            className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1 shadow-sm"
             title="Toggle Currency (USD / KHR)"
           >
             <span className="text-amber-500 dark:text-toy-yellow font-black">{currency === "USD" ? "$" : "៛"}</span>
-            <span className="text-[11px] font-bold">{currency}</span>
+            <span className="text-[10px] sm:text-[11px] font-bold">{currency}</span>
           </button>
 
           {/* Language Switcher (EN / KM) */}
           <button
             onClick={toggleLanguage}
-            className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm"
+            className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-xs font-black text-slate-800 dark:text-slate-200 transition-all active:scale-95 flex items-center gap-1 shadow-sm"
             title="Toggle Language (English / Khmer)"
           >
-            <span className="text-sm">{language === "en" ? "🇬🇧" : "🇰🇭"}</span>
-            <span className="text-[11px] font-bold uppercase">{language}</span>
+            <span className="text-xs sm:text-sm">{language === "en" ? "🇬🇧" : "🇰🇭"}</span>
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase">{language}</span>
           </button>
 
           {/* Sound FX Toggle (🔊 / 🔇) */}
           <button
             onClick={toggleSound}
-            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all active:scale-95 shadow-sm ${
+            className={`hidden sm:flex w-9 h-9 rounded-xl border items-center justify-center transition-all active:scale-95 shadow-sm ${
               soundEnabled
                 ? "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-600 dark:text-toy-green hover:border-emerald-500"
                 : "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500"
@@ -161,7 +166,7 @@ export const Navbar: React.FC = () => {
           {/* Theme Toggle (🌙 / ☀️) */}
           <button
             onClick={toggleTheme}
-            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-amber-400 flex items-center justify-center text-slate-700 dark:text-slate-300 transition-all active:scale-95 shadow-sm"
+            className="hidden sm:flex w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-amber-400 items-center justify-center text-slate-700 dark:text-slate-300 transition-all active:scale-95 shadow-sm"
             title="Toggle Dark / Light Theme"
           >
             {themeMode === "dark" ? (

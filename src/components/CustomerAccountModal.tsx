@@ -293,7 +293,7 @@ export const CustomerAccountModal: React.FC = () => {
                       type="text"
                       value={telegramHandle}
                       onChange={(e) => setTelegramHandle(e.target.value)}
-                      placeholder="@username (for 1-click admin chats)"
+                      placeholder="@username (for 1-click order updates & delivery support)"
                       className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-emerald-500 outline-none"
                     />
                   </div>

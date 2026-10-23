@@ -64,8 +64,8 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="#custom-bracelet-studio" className="hover:text-emerald-600 dark:hover:text-toy-green transition-colors">
-                  DIY Italy Modular Charm Studio
+                <a href="/italy-bracelet" className="hover:text-emerald-600 dark:hover:text-toy-green transition-colors font-bold text-emerald-700 dark:text-emerald-400">
+                  Italian Modular Charm Studio 🔗
                 </a>
               </li>
             </ul>

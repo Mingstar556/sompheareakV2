@@ -8,7 +8,6 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { ConnectedCharmLink } from "@/components/ConnectedCharmLink";
 import { NotificationToast } from "@/components/NotificationToast";
-import { AdminLiveStorefrontBar } from "@/components/admin/AdminLiveStorefrontBar";
 import { CustomerBar } from "@/components/CustomerBar";
 import { CustomerAccountModal } from "@/components/CustomerAccountModal";
 import { OrderHistoryModal } from "@/components/OrderHistoryModal";
@@ -331,16 +330,20 @@ export default function CartPage() {
                           <div className="flex items-center gap-4 flex-1 min-w-0">
                             {/* Thumbnail */}
                             <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                              <Image
-                                src={
-                                  item.product
+                                {(() => {
+                                  const itemImg = item.product
                                     ? item.product.image
-                                    : item.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png"
-                                }
-                                alt="item thumbnail"
-                                fill
-                                className="object-cover"
-                              />
+                                    : item.customBracelet?.charms[0]?.charm.image || "/assets/charm_clean.png";
+                                  return (
+                                    <Image
+                                      src={itemImg}
+                                      alt="item thumbnail"
+                                      fill
+                                      className="object-cover"
+                                      unoptimized={Boolean(itemImg?.startsWith("data:"))}
+                                    />
+                                  );
+                                })()}
                             </div>
 
                             {/* Item Details */}
@@ -715,7 +718,6 @@ export default function CartPage() {
 
       <Footer />
       <NotificationToast />
-      <AdminLiveStorefrontBar />
 
       {/* Customer Modals & Navigation Bar */}
       <CustomerAccountModal />

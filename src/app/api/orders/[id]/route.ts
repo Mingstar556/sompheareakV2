@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateOrderStatus, deleteOrder, getOrders } from "@/lib/db";
+import { updateOrderStatus, updateOrder, deleteOrder, getOrders } from "@/lib/db";
 import { OrderStatus } from "@/types/store";
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const orders = getOrders();
+    const orders = await getOrders();
     const order = orders.find((o) => o.id === id);
     if (!order) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
@@ -26,24 +26,52 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const status = body.status as OrderStatus;
 
-    if (!status) {
-      return NextResponse.json({ success: false, error: "Status is required" }, { status: 400 });
+    if (body.status && Object.keys(body).length === 1) {
+      const status = body.status as OrderStatus;
+      const updated = await updateOrderStatus(id, status);
+      if (!updated) {
+        return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+      }
+      return NextResponse.json({
+        success: true,
+        message: `Order #${updated.orderRef} status updated to ${status}`,
+        data: updated,
+      });
     }
 
-    const updated = updateOrderStatus(id, status);
+    const updated = await updateOrder(id, body);
     if (!updated) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }
-
     return NextResponse.json({
       success: true,
-      message: `Order #${updated.orderRef} status updated to ${status}`,
+      message: `Order #${updated.orderRef} updated successfully`,
       data: updated,
     });
   } catch (error) {
-    return NextResponse.json({ success: false, error: "Failed to update order status" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Failed to update order" }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const updated = await updateOrder(id, body);
+    if (!updated) {
+      return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    }
+    return NextResponse.json({
+      success: true,
+      message: `Order #${updated.orderRef} updated successfully`,
+      data: updated,
+    });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Failed to update order" }, { status: 500 });
   }
 }
 
@@ -53,7 +81,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const ok = deleteOrder(id);
+    const ok = await deleteOrder(id);
     if (!ok) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }

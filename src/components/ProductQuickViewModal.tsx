@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingCart, Box, Star, ShieldCheck, Plus, Minus, Heart } from "lucide-react";
+import { X, ShoppingCart, Box, Star, ShieldCheck, Plus, Minus, Heart, ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { sounds } from "@/utils/audio";
 import { formatPrice } from "@/utils/currency";
@@ -12,7 +12,6 @@ export const ProductQuickViewModal: React.FC = () => {
   const {
     quickViewProduct,
     setQuickViewProduct,
-    setViewer3DProduct,
     addToCart,
     currency,
     language,
@@ -20,16 +19,20 @@ export const ProductQuickViewModal: React.FC = () => {
   } = useStore();
 
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
 
   if (!quickViewProduct) return null;
 
   const product = quickViewProduct;
+  const productImages =
+    product.images && product.images.length > 0 ? product.images : [product.image];
   const discountedPrice = product.price * (1 - product.discount / 100);
 
   const handleClose = () => {
     sounds.playPop();
     setQuickViewProduct(null);
     setQuantity(1);
+    setSelectedImageIdx(0);
   };
 
   const handleAdd = () => {
@@ -54,33 +57,118 @@ export const ProductQuickViewModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
 
-          {/* Left: Product Image & Badges */}
-          <div className="relative w-full md:w-1/2 aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 flex-shrink-0 border border-slate-200 dark:border-slate-800">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
-            {product.discount > 0 && (
-              <span className="absolute top-3 left-3 px-2.5 py-1 rounded-xl bg-rose-500 text-white text-xs font-black uppercase tracking-wider shadow-md">
-                -{product.discount}% OFF
-              </span>
-            )}
-            {product.rarity && (
-              <span className="absolute bottom-3 left-3 px-3 py-1 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-amber-300 text-xs font-black">
-                ✨ {product.rarity}
-              </span>
+          {/* Left: Product Image & Badges & Multiple Photos Gallery */}
+          <div className="w-full md:w-1/2 flex flex-col gap-2.5 flex-shrink-0">
+            {/* Main Active Photo Box */}
+            <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 group">
+              <Image
+                src={productImages[selectedImageIdx] || product.image}
+                alt={`${product.name} photo ${selectedImageIdx + 1}`}
+                fill
+                className="object-cover transition-all duration-300"
+                unoptimized={Boolean(productImages[selectedImageIdx]?.startsWith("data:"))}
+              />
+
+              {product.discount > 0 && (
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-xl bg-rose-500 text-white text-xs font-black uppercase tracking-wider shadow-md">
+                  -{product.discount}% OFF
+                </span>
+              )}
+              {product.rarity && (
+                <span className="absolute bottom-3 left-3 px-3 py-1 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-amber-300 text-xs font-black">
+                  ✨ {product.rarity}
+                </span>
+              )}
+
+              {/* Multiple Photos Count Indicator */}
+              {productImages.length > 1 && (
+                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md">
+                  <Images className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>
+                    {selectedImageIdx + 1} / {productImages.length}
+                  </span>
+                </div>
+              )}
+
+              {/* Sideways Navigation Arrows */}
+              {productImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sounds.playPop();
+                      setSelectedImageIdx((prev) =>
+                        prev > 0 ? prev - 1 : productImages.length - 1
+                      );
+                    }}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 active:scale-95"
+                    title="Previous photo (Scroll left)"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sounds.playPop();
+                      setSelectedImageIdx((prev) =>
+                        prev < productImages.length - 1 ? prev + 1 : 0
+                      );
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 active:scale-95"
+                    title="Next photo (Scroll right)"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Strip: Scroll sideways to view all photos */}
+            {productImages.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                {productImages.map((img, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      sounds.playPop();
+                      setSelectedImageIdx(i);
+                    }}
+                    className={`relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
+                      i === selectedImageIdx
+                        ? "border-emerald-500 ring-2 ring-emerald-400/50 scale-102"
+                        : "border-slate-200 dark:border-slate-800 opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <Image
+                      src={img}
+                      alt={`Thumbnail ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      unoptimized={Boolean(img?.startsWith("data:"))}
+                    />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
           {/* Right: Info & Purchase */}
           <div className="flex-1 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-1.5 text-xs text-amber-500 dark:text-toy-yellow font-bold mb-1">
-                <Star className="w-4 h-4 fill-amber-400 dark:fill-toy-yellow" />
-                <span>{product.rating || 4.9}</span>
-                <span className="text-slate-500">({product.reviewsCount || 42} reviews)</span>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <div className="flex items-center gap-1 text-xs text-amber-500 dark:text-toy-yellow font-bold">
+                  <Star className="w-4 h-4 fill-amber-400 dark:fill-toy-yellow" />
+                  <span>{product.rating || 4.9}</span>
+                  <span className="text-slate-500">({product.reviewsCount || 42})</span>
+                </div>
+                {product.code && (
+                  <span className="font-mono text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-700/50">
+                    CODE: {product.code}
+                  </span>
+                )}
               </div>
 
               <h2 className="text-2xl font-black text-slate-900 dark:text-white font-fredoka leading-tight">
@@ -158,19 +246,8 @@ export const ProductQuickViewModal: React.FC = () => {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    handleClose();
-                    setViewer3DProduct(product);
-                  }}
-                  className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
-                  title="View in 3D"
-                >
-                  <Box className="w-4 h-4" />
-                  <span>3D View</span>
-                </button>
-                <button
                   onClick={handleAdd}
-                  className="flex-1 py-3 px-5 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-sm flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
+                  className="w-full py-3.5 px-5 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-800 shadow-toy-green-glow border-b-4 border-emerald-950 font-fredoka text-sm flex items-center justify-center gap-2 hover:from-emerald-400 hover:to-green-500 active:scale-95 transition-all"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>{t("addToCart")}</span>
