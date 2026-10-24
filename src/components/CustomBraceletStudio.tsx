@@ -419,13 +419,6 @@ export const CustomBraceletStudio: React.FC<CustomBraceletStudioProps> = ({
     addCustomBraceletToCart(customItem);
   };
 
-  const finishDescriptions = {
-    silver: "Original 316L Surgical Inox Steel (Polished Silver)",
-    gold: "18K Yellow Gold Vacuum Ion-Plating",
-    rose: "18K Rose Gold Champagne Ion-Plating",
-    black: "Tactical Matte Obsidian Black PVD",
-  };
-
   return (
     <section id="custom-bracelet-studio" className="py-4 sm:py-8 px-3 sm:px-6 max-w-5xl mx-auto pb-32">
       {/* ==================================================== */}
@@ -467,60 +460,68 @@ export const CustomBraceletStudio: React.FC<CustomBraceletStudioProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Minimum Bar (Relocated here for clear visibility) */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">
-            <span>16 Charms Minimum</span>
-            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-              {activeCharmsCount} / {MIN_CHARMS}
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
-            <div
-              className={`h-full transition-all duration-300 rounded-full ${
-                isMinimumReached ? "bg-emerald-500 shadow-sm" : "bg-emerald-500"
-              }`}
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Row 3: Preview Canvas / Ribbon */}
-        <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 min-h-[140px] sm:min-h-[160px] flex items-center justify-center p-3 relative overflow-hidden">
-          {activeCharmsCount === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center space-y-1.5 py-4 select-none">
-              <Layers className="w-8 h-8 text-slate-400 animate-pulse" />
-              <span className="text-sm font-black font-fredoka text-slate-700 dark:text-slate-300">
-                {language === "km" ? "ចាប់ផ្តើមរៀបចំ" : "Start Assembling"}
-              </span>
-              <span className="text-xs text-slate-400">
-                {language === "km" ? "(ចុចលើត្បូងខាងក្រោមដើម្បីបន្ថែម)" : "(Tap charms below to connect)"}
-              </span>
-            </div>
-          ) : (
-            <div
-              ref={ribbonScrollRef}
-              className="w-full flex items-center overflow-x-auto py-2 px-1 scrollbar-thin touch-pan-x [-webkit-overflow-scrolling:touch]"
-            >
-              <div className="flex items-center min-w-max mx-auto py-1 gap-1">
-                {slots.map((charm, idx) => (
-                  <ConnectedCharmLink
-                    key={`slot-${idx}-${charm.id}`}
-                    charm={charm}
-                    slotIndex={idx}
-                    finish={finish}
-                    isSelected={selectedSlotIndex === idx}
-                    onSelect={() => {
-                      sounds.playPop();
-                      setSelectedSlotIndex(selectedSlotIndex === idx ? null : idx);
-                    }}
-                    onRemove={() => handleRemoveSlot(idx)}
-                    size="workbench"
-                  />
-                ))}
+        {/* Extended View Box with Integrated Minimum Progress Bar */}
+        <div className="rounded-2xl sm:rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 min-h-[190px] sm:min-h-[220px] flex flex-col justify-between p-3.5 sm:p-5 relative overflow-hidden transition-all">
+          {/* Main Ribbon / Canvas Area */}
+          <div className="flex-1 flex items-center justify-center w-full py-4 sm:py-6">
+            {activeCharmsCount === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center space-y-1.5 select-none">
+                <Layers className="w-9 h-9 text-slate-400 animate-pulse" />
+                <span className="text-sm sm:text-base font-black font-fredoka text-slate-700 dark:text-slate-300">
+                  {language === "km" ? "ចាប់ផ្តើមរៀបចំ" : "Start Assembling"}
+                </span>
+                <span className="text-xs text-slate-400">
+                  {language === "km" ? "(ចុចលើត្បូងខាងក្រោមដើម្បីបន្ថែម)" : "(Tap charms below to connect)"}
+                </span>
               </div>
+            ) : (
+              <div
+                ref={ribbonScrollRef}
+                className="w-full flex items-center overflow-x-auto py-2 px-1 scrollbar-thin touch-pan-x [-webkit-overflow-scrolling:touch]"
+              >
+                <div className="flex items-center min-w-max mx-auto py-1 gap-1">
+                  {slots.map((charm, idx) => (
+                    <ConnectedCharmLink
+                      key={`slot-${idx}-${charm.id}`}
+                      charm={charm}
+                      slotIndex={idx}
+                      finish={finish}
+                      isSelected={selectedSlotIndex === idx}
+                      onSelect={() => {
+                        sounds.playPop();
+                        setSelectedSlotIndex(selectedSlotIndex === idx ? null : idx);
+                      }}
+                      onRemove={() => handleRemoveSlot(idx)}
+                      size="workbench"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Integrated Minimum Progress Bar inside View Box */}
+          <div className="w-full pt-3 mt-auto border-t border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5 font-fredoka">
+                <span>{language === "km" ? "អប្បបរមា ១៦ គ្រាប់ (16 Charms Minimum)" : "16 Charms Minimum"}</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  ({isMinimumReached ? (language === "km" ? "គ្រប់ចំនួន" : "Ready") : (language === "km" ? `ខ្វះ ${charmsNeededForMin}` : `Need ${charmsNeededForMin} more`)})
+                </span>
+              </span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-black">
+                {activeCharmsCount} / {MIN_CHARMS}
+              </span>
             </div>
-          )}
+            <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
+              <div
+                className={`h-full transition-all duration-300 rounded-full ${
+                  isMinimumReached ? "bg-emerald-500 shadow-sm" : "bg-emerald-500"
+                }`}
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Row 4: Code Share & Import controls */}
